@@ -1,8 +1,26 @@
 const path = require('path');
 const htmlWebpackPlugin = require('html-webpack-plugin');
+const postcssNextPlugin = require('postcss-cssnext');
+
+const context = path.resolve(__dirname, 'src');
+const babelOptions = {
+  presets: [
+    [
+      'env',
+      {
+        targets: {
+          browsers: 'last 2 versions',
+        },
+        modules: false,
+      },
+    ],
+    'react',
+    'stage-1',
+  ],
+};
 
 module.exports = {
-  context: path.resolve(__dirname, 'src'),
+  context,
   entry: {
     index: './index.js',
   },
@@ -12,27 +30,53 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.css$/,
+        use: [
+          { loader: 'style-loader' },
+          {
+            loader: 'css-loader',
+            options: {
+              importLoaders: 1,
+              modules: true,
+              localIdentName: '[path]___[name]__[local]___[hash:base64:5]',
+            },
+          },
+          {
+            loader: 'postcss-loader',
+            options: {
+              plugins: () => [
+                postcssNextPlugin,
+              ],
+            },
+          },
+        ],
+      },
+      {
         test: /\.jsx?$/,
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
-          options: {
-            presets: [
-              [
-                'env',
-                {
-                  targets: {
-                    browsers: 'last 2 versions',
-                  },
-                  modules: false
-                },
-              ],
-              'react',
-              'stage-1',
-            ],
-          }
+          options: babelOptions,
         },
-      }
+      },
+      {
+        test: /\.svg$/,
+        exclude: /node_modules/,
+        use: [
+          {
+            loader: 'babel-loader',
+            options: babelOptions,
+          },
+          {
+            loader: 'react-svg-loader',
+            options: {
+              svgo: {
+                floatPrecision: 2,
+              },
+            },
+          },
+        ],
+      },
     ],
   },
   externals: {
@@ -46,5 +90,5 @@ module.exports = {
       template: './index.html',
       showErrors: true,
     }),
-  ]
+  ],
 };

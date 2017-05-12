@@ -5,10 +5,29 @@ class Canvas extends Component {
   static defaultProps = {
     width: 600,
     height: 400,
+    onDimensionUpdate: () => {},
   }
   static propTypes = {
     width: PropTypes.number,
     height: PropTypes.number,
+    onDimensionUpdate: PropTypes.func,
+  }
+  componentDidUpdate() {
+    this.handleUpdate();
+  }
+  componentDidMount() {
+    this.handleUpdate();
+  }
+  handleUpdate() {
+    const rect = this.el.getBoundingClientRect();
+    this.props.onDimensionUpdate({
+      width: rect.width,
+      height: rect.height,
+      left: rect.left,
+      top: rect.top,
+      right: rect.right,
+      bottom: rect.bottom,
+    });
   }
   render() {
     const { width, height } = this.props;
@@ -16,14 +35,12 @@ class Canvas extends Component {
       style: {
         width,
         height,
+        border: '1px solid #000',
       },
-      onMouseMove: (e) => {
-        console.log('mousemove', e);
-      }
+      ref: node => (this.el = node),
     };
     return (
       <div {...canvasProps}>
-        <button>xxx</button>
       </div>
     );
   }
