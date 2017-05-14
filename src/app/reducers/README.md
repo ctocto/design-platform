@@ -10,6 +10,8 @@
     top,
     right,
     bottom,
-  }
+  },
+  currentPicker,
+  pickerPosition,
 }
 ```

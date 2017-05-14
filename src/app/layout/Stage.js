@@ -1,7 +1,9 @@
 import { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+
 import { canvasAction } from '../actions/';
+import { isPickerOnCanvas } from '../selectors/';
 import Canvas from '../components/canvas';
 
 
@@ -9,19 +11,21 @@ class Stage extends PureComponent {
   static defaultProps = {
     className: '',
     onDimensionUpdate: () => {},
+    pickerOnCanvas: false,
   }
   static propTypes = {
     className: PropTypes.string,
     onDimensionUpdate: PropTypes.func,
+    pickerOnCanvas: PropTypes.bool,
   }
   render() {
-    console.log(this.props)
-    const { className, onDimensionUpdate } = this.props;
+    const { className, onDimensionUpdate, pickerOnCanvas } = this.props;
     const props = {
       className,
     };
     const canvasProps = {
       onDimensionUpdate,
+      pickerOver: pickerOnCanvas,
     };
     return (
       <div {...props}><Canvas {...canvasProps} /></div>
@@ -31,6 +35,7 @@ class Stage extends PureComponent {
 
 const mapStateToProps = (state) => {
   return {
+    pickerOnCanvas: isPickerOnCanvas(state),
   }
 };
 

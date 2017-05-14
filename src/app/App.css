@@ -19,7 +19,7 @@ html, body, :global(#App) {
   justify-content: center;
   align-items: center;
 }
-.leftPane {
+.storePane {
   order: 0;
   flex: 0 0 128px;
 }

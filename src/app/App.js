@@ -1,6 +1,6 @@
 import { Component } from 'react';
 
-import LeftPane from './layout/LeftPane';
+import StorePane from './layout/StorePane';
 import RightPane from './layout/RightPane';
 import Stage from './layout/Stage';
 
@@ -11,7 +11,7 @@ class App extends Component {
     return (
       <div className={styles.workspace}>
         <Stage className={styles.stage} />
-        <LeftPane className={styles.leftPane} />
+        <StorePane className={styles.storePane} />
         <RightPane className={styles.rightPane} />
       </div>
     );

@@ -1,16 +1,21 @@
 import { Component } from 'react';
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
+
+import styles from './Canvas.css';
 
 class Canvas extends Component {
   static defaultProps = {
     width: 600,
     height: 400,
     onDimensionUpdate: () => {},
+    pickerOver: false,
   }
   static propTypes = {
     width: PropTypes.number,
     height: PropTypes.number,
     onDimensionUpdate: PropTypes.func,
+    pickerOver: PropTypes.bool,
   }
   componentDidUpdate() {
     this.handleUpdate();
@@ -30,12 +35,14 @@ class Canvas extends Component {
     });
   }
   render() {
-    const { width, height } = this.props;
+    const { width, height, pickerOver } = this.props;
     const canvasProps = {
+      className: classnames(styles.canvas, {
+        [styles['canvas--pickerOver']]: pickerOver,
+      }),
       style: {
         width,
         height,
-        border: '1px solid #000',
       },
       ref: node => (this.el = node),
     };
