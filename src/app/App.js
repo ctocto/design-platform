@@ -1,21 +1,15 @@
-import { Component } from 'react';
-
-import StorePane from './layout/StorePane';
-import RightPane from './layout/RightPane';
-import Stage from './layout/Stage';
+import PickerPane from './containers/PickerPane';
+import RightPane from './containers/RightPane';
+import Stage from './containers/Stage';
 
 import styles from './App.css';
 
-class App extends Component {
-  render() {
-    return (
-      <div className={styles.workspace}>
-        <Stage className={styles.stage} />
-        <StorePane className={styles.storePane} />
-        <RightPane className={styles.rightPane} />
-      </div>
-    );
-  }
-}
+const App = () => (
+  <div className={styles.workspace}>
+    <Stage className={styles.stage} />
+    <PickerPane className={styles.pickerPane} />
+    <RightPane className={styles.rightPane} />
+  </div>
+);
 
 export default App;

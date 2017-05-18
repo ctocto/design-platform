@@ -65,7 +65,7 @@ export default class ComponentGrid extends Component {
     return dragContent;
   }
   render() {
-    const { name, prototype, position } = this.props;
+    const { name, prototype, position, pickerInCanvas } = this.props;
     return (
       <div className={styles.grid} key={name}>
         <div className={styles.grid__icon}>{ prototype.icon }</div>
@@ -76,6 +76,7 @@ export default class ComponentGrid extends Component {
           onDrag={this.onDrag}
           onStop={this.onStop}
           offsetParent={document.documentElement}
+          disabled={pickerInCanvas}
         >
           {this.renderDragContent()}
         </Draggable>

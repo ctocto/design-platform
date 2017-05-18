@@ -1,7 +1,7 @@
 import assign from 'lodash/assign';
 import { CANVAS_DIMENSION_UPDATE } from '../actions/actionTypes';
 
-function canvasDimension(state = {}, action) {
+function dimension(state = {}, action) {
   switch (action.type) {
     case CANVAS_DIMENSION_UPDATE:
       return assign({}, action.payload);
@@ -11,5 +11,5 @@ function canvasDimension(state = {}, action) {
 }
 
 export {
-  canvasDimension,
+  dimension,
 };

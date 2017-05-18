@@ -1,6 +1,7 @@
 import { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { batchActions } from 'redux-batched-actions';
 import assign from 'lodash/assign';
 
 import { pickerAction } from '../actions/';
@@ -16,7 +17,7 @@ const VComponentList = Object.keys(VComponents).map(vname => ({
   View: VComponents[vname].View,
 }));
 
-class StorePane extends PureComponent {
+class PickerPane extends PureComponent {
   static defaultProps = {
     className: '',
     currentPicker: undefined,
@@ -79,7 +80,7 @@ class StorePane extends PureComponent {
 function mapStateToProps(state) {
   return {
     currentPicker: state.currentPicker.picker,
-    position: state.pickerPositon,
+    position: state.pickerPosition,
     pickerInCanvas: isPickerOnCanvas(state),
   }
 }
@@ -92,7 +93,10 @@ function mapDispatchToProps(dispatch) {
       }));
     },
     pickEnd(picker){
-      dispatch(pickerAction.finishDragPicker(picker));
+      dispatch(batchActions([
+        pickerAction.updatePickerPosition({x: 0, y: 0}),
+        pickerAction.finishDragPicker(picker),
+      ]));
     },
     updatePickerPosition(position) {
       dispatch(pickerAction.updatePickerPosition(position))
@@ -103,4 +107,4 @@ function mapDispatchToProps(dispatch) {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(StorePane);
+)(PickerPane);

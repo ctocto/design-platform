@@ -1,6 +1,8 @@
-import { Component } from 'react';
+import { Component, createElement } from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
+
+import * as VComponents from '../../../visual-components';
 
 import styles from './Canvas.css';
 
@@ -10,12 +12,16 @@ class Canvas extends Component {
     height: 400,
     onDimensionUpdate: () => {},
     pickerOver: false,
+    currentPicker: undefined,
+    schemaData: {},
   }
   static propTypes = {
     width: PropTypes.number,
     height: PropTypes.number,
     onDimensionUpdate: PropTypes.func,
     pickerOver: PropTypes.bool,
+    currentPicker: PropTypes.string,
+    schemaData: PropTypes.object,
   }
   componentDidUpdate() {
     this.handleUpdate();
@@ -34,6 +40,17 @@ class Canvas extends Component {
       bottom: rect.bottom,
     });
   }
+  renderPageContent() {
+    const { currentPicker, pickerOver } = this.props;
+    const currentComponent = VComponents[currentPicker];
+    let content = [];
+    if (currentComponent && pickerOver) {
+      content.push(
+        createElement(currentComponent.View)
+      );
+    }
+    return content;
+  }
   render() {
     const { width, height, pickerOver } = this.props;
     const canvasProps = {
@@ -48,6 +65,7 @@ class Canvas extends Component {
     };
     return (
       <div {...canvasProps}>
+        {this.renderPageContent()}
       </div>
     );
   }

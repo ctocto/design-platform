@@ -1,8 +1,4 @@
+import { createAction } from 'redux-actions';
 import { CANVAS_DIMENSION_UPDATE } from './actionTypes';
 
-export function updateCanvasDimension(payload) {
-  return {
-    type: CANVAS_DIMENSION_UPDATE,
-    payload,
-  };
-}
+export const updateCanvasDimension = createAction(CANVAS_DIMENSION_UPDATE);

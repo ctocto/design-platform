@@ -1,11 +1,13 @@
 import { combineReducers } from 'redux';
-import { canvasDimension } from './canvas';
+import { dimension } from './canvas';
 import { selectPicker, dragPicker } from './picker';
+import { schema } from './schema';
 
 const appReducer = combineReducers({
-  canvasDimension,
+  canvasDimension: dimension,
   currentPicker: selectPicker,
   pickerPosition: dragPicker,
+  schema,
 });
 
 export default appReducer;

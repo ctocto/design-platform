@@ -1,4 +1,6 @@
 import { createSelector } from 'reselect';
+import { denormalize } from 'normalizr';
+import { appSchema } from '../schema/';
 
 const getPickerPosition = state => state.pickerPosition;
 const getCurrentPickerOriginPos = state => state.currentPicker.originPos;
@@ -17,4 +19,11 @@ export const isPickerOnCanvas = createSelector(
     }
     return false;
   },
+);
+
+const getSchema = state => state.schema;
+
+export const selectSchema = createSelector(
+  [getSchema],
+  schema => denormalize(schema.result, appSchema, schema.entities),
 );

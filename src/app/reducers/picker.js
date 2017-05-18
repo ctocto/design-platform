@@ -18,7 +18,10 @@ function selectPicker(state = {
   }
 }
 
-function dragPicker(state = {}, action) {
+function dragPicker(state = {
+  x: 0,
+  y: 0,
+}, action) {
   switch (action.type) {
     case UPDATE_PICKER_POSITION:
       return assign({}, action.payload);

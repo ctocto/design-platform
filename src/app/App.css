@@ -19,7 +19,7 @@ html, body, :global(#App) {
   justify-content: center;
   align-items: center;
 }
-.storePane {
+.pickerPane {
   order: 0;
   flex: 0 0 128px;
 }
