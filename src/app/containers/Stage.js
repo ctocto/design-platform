@@ -3,35 +3,57 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 import { canvasAction } from '../actions/';
-import { isPickerOnCanvas, selectSchema } from '../selectors/';
+import { selectSchema } from '../selectors/';
 import Canvas from '../components/canvas';
-
+import { selectActiveComponentsIndex } from '../selectors/';
 
 class Stage extends PureComponent {
   static defaultProps = {
     className: '',
-    currentPicker: undefined,
     onDimensionUpdate: () => {},
-    pickerOnCanvas: false,
-    schemaData: {},
+    addActiveComponent: () => {},
+    removeActiveComponent: () => {},
+    schemaData: [],
+    activeComponentsIndex: {},
+    startDragging: () => {},
+    stopDragging: () => {},
+    dragging: false,
   }
   static propTypes = {
     className: PropTypes.string,
-    currentPicker: PropTypes.string,
     onDimensionUpdate: PropTypes.func,
-    pickerOnCanvas: PropTypes.bool,
-    schemaData: PropTypes.object,
+    addActiveComponent: PropTypes.func,
+    removeActiveComponent: PropTypes.func,
+    schemaData: PropTypes.array,
+    activeComponentsIndex: PropTypes.object,
+    startDragging: PropTypes.func,
+    stopDragging: PropTypes.func,
+    dragging: PropTypes.bool,
   }
   render() {
-    const { className, currentPicker, onDimensionUpdate, pickerOnCanvas, schemaData } = this.props;
+    const {
+      className,
+      onDimensionUpdate,
+      addActiveComponent,
+      removeActiveComponent,
+      schemaData,
+      activeComponentsIndex,
+      startDragging,
+      stopDragging,
+      dragging,
+    } = this.props;
     const props = {
       className,
     };
     const canvasProps = {
-      onDimensionUpdate,
-      currentPicker,
-      pickerOver: pickerOnCanvas,
       schemaData,
+      onDimensionUpdate,
+      setActive: addActiveComponent,
+      setInactive: removeActiveComponent,
+      activeComponentsIndex,
+      startDragging,
+      stopDragging,
+      dragging,
     };
     return (
       <div {...props}><Canvas {...canvasProps} /></div>
@@ -41,9 +63,9 @@ class Stage extends PureComponent {
 
 const mapStateToProps = (state) => {
   return {
-    currentPicker: state.currentPicker.picker,
-    pickerOnCanvas: isPickerOnCanvas(state),
     schemaData: selectSchema(state),
+    activeComponentsIndex: selectActiveComponentsIndex(state),
+    dragging: state.canvasStatus.dragging,
   }
 };
 
@@ -51,6 +73,18 @@ const mapDispatchToProps = (dispatch) => {
   return {
     onDimensionUpdate: (dimension) => {
       dispatch(canvasAction.updateCanvasDimension(dimension));
+    },
+    addActiveComponent: (id) => {
+      dispatch(canvasAction.addActiveComponent(id));
+    },
+    removeActiveComponent: (id) => {
+      dispatch(canvasAction.removeActiveComponent(id));
+    },
+    startDragging: () => {
+      dispatch(canvasAction.startDragging());
+    },
+    stopDragging: () => {
+      dispatch(canvasAction.stopDragging());
     },
   }
 };

@@ -1,13 +1,14 @@
 import { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { batchActions } from 'redux-batched-actions';
+// import { batchActions } from 'redux-batched-actions';
 import assign from 'lodash/assign';
+import uniqueId from 'lodash/uniqueId';
 
-import { pickerAction } from '../actions/';
+import { schemaAction } from '../actions/';
 import ComponentStore from '../components/component-store/';
 import ComponentPicker from '../components/component-picker/';
-import { isPickerOnCanvas } from '../selectors/';
+import { selectActiveComponentsIndex } from '../selectors/';
 
 import * as VComponents from '../../visual-components';
 
@@ -20,44 +21,35 @@ const VComponentList = Object.keys(VComponents).map(vname => ({
 class PickerPane extends PureComponent {
   static defaultProps = {
     className: '',
-    currentPicker: undefined,
-    position: {
-      x: 0,
-      y: 0,
-    },
-    pickStart() {},
-    pickEnd() {},
-    updatePickerPosition() {},
-    pickerInCanvas: false,
+    addComponentToSchema() {},
+    canvasDimension: undefined,
+    activeComponentsIndex: {},
   }
   static propTypes = {
     className: PropTypes.string,
-    currentPicker: PropTypes.string,
     position: PropTypes.shape({
       x: PropTypes.number,
       y: PropTypes.number,
     }),
-    pickStart: PropTypes.func,
-    pickEnd: PropTypes.func,
-    updatePickerPosition: PropTypes.func,
-    pickerInCanvas: PropTypes.bool,
+    addComponentToSchema: PropTypes.func,
+    canvasDimension: PropTypes.shape({
+      top: PropTypes.number,
+      right: PropTypes.number,
+      bottom: PropTypes.number,
+      left: PropTypes.number,
+    }),
+    activeComponentsIndex: PropTypes.object,
   }
   renderComponentPicker = ({ name, prototype }) => {
-    const { currentPicker, position, pickStart, pickEnd, updatePickerPosition, pickerInCanvas } = this.props;
+    const { canvasDimension, addComponentToSchema, activeComponentsIndex } = this.props;
     const pickerProps = {
       name,
       prototype,
       key: name,
-      pickStart,
-      pickEnd,
+      canvasDimension,
+      addComponentToSchema,
+      activeComponentsIndex,
     };
-    if (name === currentPicker) {
-      assign(pickerProps, {
-        updatePickerPosition,
-        position,
-        pickerInCanvas,
-      });
-    }
     return <ComponentPicker {...pickerProps} />
   }
   render() {
@@ -79,27 +71,16 @@ class PickerPane extends PureComponent {
 
 function mapStateToProps(state) {
   return {
-    currentPicker: state.currentPicker.picker,
-    position: state.pickerPosition,
-    pickerInCanvas: isPickerOnCanvas(state),
+    canvasDimension: state.canvasDimension,
+    activeComponentsIndex: selectActiveComponentsIndex(state),
   }
 }
 function mapDispatchToProps(dispatch) {
   return {
-    pickStart(picker, originPos) {
-      dispatch(pickerAction.startDragPicker({
-        picker,
-        originPos,
-      }));
-    },
-    pickEnd(picker){
-      dispatch(batchActions([
-        pickerAction.updatePickerPosition({x: 0, y: 0}),
-        pickerAction.finishDragPicker(picker),
-      ]));
-    },
-    updatePickerPosition(position) {
-      dispatch(pickerAction.updatePickerPosition(position))
+    addComponentToSchema(payload) {
+      dispatch(schemaAction.addComponentToSchema(assign({}, payload, {
+        id: uniqueId(payload.componentName),
+      })));
     },
   }
 }

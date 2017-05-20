@@ -2,11 +2,30 @@
   position: relative;
 }
 .Component__actionCover {
+  display: none;
   position: absolute;
   width: 100%;
   height: 100%;
   box-sizing: border-box;
-  &:hover {
-    border: 1px solid #f00;
+  border: 1px solid #f00;
+}
+.Component__actionCover--active {
+  display: block;
+}
+.Component__controller {
+  position: absolute;
+  right: -1px;
+  top: -1px;
+  padding: 0;
+  width: 18px;
+  height: 18px;
+  background: none;
+  border: 1px solid #000;
+  cursor: pointer;
+  &:focus {
+    outline: 0 none;
   }
+}
+.Component__dragControl {
+  cursor: move;
 }

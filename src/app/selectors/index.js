@@ -2,28 +2,38 @@ import { createSelector } from 'reselect';
 import { denormalize } from 'normalizr';
 import { appSchema } from '../schema/';
 
-const getPickerPosition = state => state.pickerPosition;
-const getCurrentPickerOriginPos = state => state.currentPicker.originPos;
-const getCanvasDimension = state => state.canvasDimension;
-
-export const isPickerOnCanvas = createSelector(
-  [getPickerPosition, getCurrentPickerOriginPos, getCanvasDimension],
-  (pickerPosition, originPos, canvasDimension) => {
-    if (!(pickerPosition && originPos)) return false;
-    if ((originPos.bottom + pickerPosition.y >= canvasDimension.top)
-      && (originPos.top + pickerPosition.y <= canvasDimension.bottom)) {
-      if ((originPos.right + pickerPosition.x >= canvasDimension.left)
-      && (originPos.left + pickerPosition.x <= canvasDimension.right)) {
-        return true;
-      }
-    }
-    return false;
-  },
-);
-
-const getSchema = state => state.schema;
+const getNormalizedSchema = state => state.schema;
+const getActiveComponents = state => state.canvasStatus.activeComponents;
 
 export const selectSchema = createSelector(
-  [getSchema],
+  [getNormalizedSchema],
   schema => denormalize(schema.result, appSchema, schema.entities),
+);
+
+export const selectActiveComponentsIndex = createSelector(
+  [getNormalizedSchema, getActiveComponents],
+  (normalizedSchema, activeComponents) => {
+    const res = {};
+    activeComponents.forEach((id) => {
+      if (normalizedSchema.result.includes(id)) {
+        res[id] = {
+          pid: null,
+          index: normalizedSchema.result.indexOf(id),
+        };
+      } else {
+        Object.keys(normalizedSchema.entities.components).some((pid) => {
+          if (pid !== id) {
+            if (normalizedSchema.entities.components[pid].children.includes[id]) {
+              res[id] = {
+                pid,
+                index: normalizedSchema.entities.components[pid].children.indexOf(id),
+              };
+              return true;
+            }
+          }
+        });
+      }
+    });
+    return res;
+  },
 );

@@ -11,17 +11,29 @@ class Canvas extends Component {
     width: 600,
     height: 400,
     onDimensionUpdate: () => {},
+    setActive: () => {},
+    setInactive: () => {},
     pickerOver: false,
     currentPicker: undefined,
-    schemaData: {},
+    schemaData: [],
+    activeComponentsIndex: {},
+    startDragging: () => {},
+    stopDragging: () => {},
+    dragging: false,
   }
   static propTypes = {
     width: PropTypes.number,
     height: PropTypes.number,
     onDimensionUpdate: PropTypes.func,
+    setActive: PropTypes.func,
+    setInactive: PropTypes.func,
     pickerOver: PropTypes.bool,
     currentPicker: PropTypes.string,
-    schemaData: PropTypes.object,
+    schemaData: PropTypes.array,
+    activeComponentsIndex: PropTypes.object,
+    startDragging: PropTypes.func,
+    stopDragging: PropTypes.func,
+    dragging: PropTypes.bool,
   }
   componentDidUpdate() {
     this.handleUpdate();
@@ -40,16 +52,32 @@ class Canvas extends Component {
       bottom: rect.bottom,
     });
   }
-  renderPageContent() {
-    const { currentPicker, pickerOver } = this.props;
-    const currentComponent = VComponents[currentPicker];
-    let content = [];
-    if (currentComponent && pickerOver) {
-      content.push(
-        createElement(currentComponent.View)
-      );
-    }
-    return content;
+  renderComponents(components) {
+    const { setActive, setInactive, activeComponentsIndex, dragging } = this.props;
+    return components.map(c => (
+      createElement(VComponents[c.component].View, {
+        key: c.id,
+        ...c.props,
+        children: this.renderComponents(c.children),
+        mouseEnter() {
+          console.log('enter', c.id);
+          setActive(c.id);
+        },
+        mouseLeave() {
+          console.log('leave', c.id);
+          setInactive(c.id);
+        },
+        startDragging() {},
+        stopDragging() {},
+        active: !!activeComponentsIndex[c.id],
+        dragging,
+      })
+    ));
+  }
+  renderSchema() {
+    const { schemaData } = this.props;
+    let schemaResult = this.renderComponents(schemaData);
+    return schemaResult;
   }
   render() {
     const { width, height, pickerOver } = this.props;
@@ -65,7 +93,7 @@ class Canvas extends Component {
     };
     return (
       <div {...canvasProps}>
-        {this.renderPageContent()}
+        {this.renderSchema()}
       </div>
     );
   }

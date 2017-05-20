@@ -12,18 +12,19 @@
     bottom,
   },
   currentPicker,
-  pickerPosition,
   schema,
 }
 ```
 
 ## State.scheme
 ```
-{
-  app: {
+[
+  {
+    id: 'id0',
     component: 'root',
     children: [
       {
+        id: 'id1',
         component: 'componentA',
         props: {
           c: 3,
@@ -31,6 +32,7 @@
         },
         children: [
           {
+            id: 'id11',
             component: 'componentB',
             props: {
               c: 33,
@@ -40,6 +42,7 @@
         ],
       },
       {
+        id: 'id2',
         component: 'componentB',
         props: {
           c: 3,
@@ -47,6 +50,7 @@
         },
         children: [
           {
+            id: 'id21',
             component: 'componentA',
             props: {
               c: 4,
@@ -54,6 +58,7 @@
             },
             children: [
               {
+                id: 'id211',
                 component: 'componentB',
                 props: {
                   c: 31,
@@ -61,6 +66,7 @@
                 },
               },
               {
+                id: 'id21',
                 component: 'componentC',
                 props: {
                   c: 32,
@@ -77,5 +83,5 @@
       b: 2,
     },
   }
-}
+]
 ```
