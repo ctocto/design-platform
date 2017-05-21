@@ -2,7 +2,6 @@ import { Component } from 'react';
 import Draggable from 'react-draggable';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
-import assign from 'lodash/assign';
 
 import styles from './ComponentPicker.css';
 import * as VComponents from '../../../visual-components';
@@ -11,21 +10,19 @@ export default class ComponentPicker extends Component {
   static defaultProps = {
     name: undefined,
     prototype: undefined,
-    addComponentToSchema() {},
     canvasDimension: undefined,
-    activeComponentsIndex: {},
+    addComponent() {},
   }
   static propTypes = {
     name: PropTypes.string,
     prototype: PropTypes.object,
-    addComponentToSchema: PropTypes.func,
     canvasDimension: PropTypes.shape({
       top: PropTypes.number,
       right: PropTypes.number,
       bottom: PropTypes.number,
       left: PropTypes.number,
     }),
-    activeComponentsIndex: PropTypes.object,
+    addComponent: PropTypes.func,
   }
   state = {
     dragInCanvas: false,
@@ -68,36 +65,24 @@ export default class ComponentPicker extends Component {
     } else {
       if (this.calculatePickerIsInCanvas(pos)) {
         this.setState({
-          dragInCanvas: true
+          dragInCanvas: true,
         });
       }
     }
   }
   onStop = (e, data) => {
-    const { dragInCanvas } = this.state; 
+    const { dragInCanvas } = this.state;
     if (dragInCanvas) {
       this.setState({
         dragInCanvas: false,
       });
-      const { name, activeComponentsIndex } = this.props;
+      const { name } = this.props;
       const componentName = name;
       const componentProps = {};
-      const ids = Object.keys(activeComponentsIndex);
-      let pid = null;
-      const info = {
-        pid: null,
-        index: -1,
-      };
-      if (ids.length > 0) {
-        assign(info, {
-          pid: activeComponentsIndex[ids[0]].pid,
-          index: activeComponentsIndex[ids[0]].index + 1,
-        });
-      }
-      this.props.addComponentToSchema(assign(info, {
+      this.props.addComponent({
         componentName,
         componentProps,
-      }));
+      });
     }
   }
   renderDragContent() {

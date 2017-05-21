@@ -1,4 +1,4 @@
-import { Component, createElement } from 'react';
+import { Component } from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 
@@ -11,12 +11,14 @@ class Canvas extends Component {
     width: 600,
     height: 400,
     onDimensionUpdate: () => {},
-    setActive: () => {},
-    setInactive: () => {},
+    setFocus: () => {},
+    setUnfocus: () => {},
     pickerOver: false,
     currentPicker: undefined,
     schemaData: [],
-    activeComponentsIndex: {},
+    activeComponent: null,
+    focusComponent: null,
+    setComponentActive() {},
     startDragging: () => {},
     stopDragging: () => {},
     dragging: false,
@@ -25,21 +27,25 @@ class Canvas extends Component {
     width: PropTypes.number,
     height: PropTypes.number,
     onDimensionUpdate: PropTypes.func,
-    setActive: PropTypes.func,
-    setInactive: PropTypes.func,
+    setFocus: PropTypes.func,
+    setUnfocus: PropTypes.func,
     pickerOver: PropTypes.bool,
     currentPicker: PropTypes.string,
     schemaData: PropTypes.array,
-    activeComponentsIndex: PropTypes.object,
+    activeComponent: PropTypes.string,
+    focusComponent: PropTypes.string,
+    setComponentActive: PropTypes.func,
     startDragging: PropTypes.func,
     stopDragging: PropTypes.func,
     dragging: PropTypes.bool,
   }
-  componentDidUpdate() {
-    this.handleUpdate();
-  }
   componentDidMount() {
     this.handleUpdate();
+  }
+  componentDidUpdate(prevProps) {
+    if (this.props.width !== prevProps.width || this.props.height !== prevProps.height) {
+      this.handleUpdate();
+    }
   }
   handleUpdate() {
     const rect = this.el.getBoundingClientRect();
@@ -53,31 +59,28 @@ class Canvas extends Component {
     });
   }
   renderComponents(components) {
-    const { setActive, setInactive, activeComponentsIndex, dragging } = this.props;
-    return components.map(c => (
-      createElement(VComponents[c.component].View, {
+    const {
+      activeComponent,
+      focusComponent,
+      dragging,
+    } = this.props;
+    return components.map((c) => {
+      const View = VComponents[c.component].View;
+      const viewProps = {
+        id: c.id,
         key: c.id,
         ...c.props,
-        children: this.renderComponents(c.children),
-        mouseEnter() {
-          console.log('enter', c.id);
-          setActive(c.id);
-        },
-        mouseLeave() {
-          console.log('leave', c.id);
-          setInactive(c.id);
-        },
-        startDragging() {},
-        stopDragging() {},
-        active: !!activeComponentsIndex[c.id],
+        active: activeComponent === c.id,
+        focus: focusComponent === c.id,
         dragging,
-      })
-    ));
+        canvas: this,
+      };
+      return <View {...viewProps}>{this.renderComponents(c.children)}</View>;
+    });
   }
   renderSchema() {
     const { schemaData } = this.props;
-    let schemaResult = this.renderComponents(schemaData);
-    return schemaResult;
+    return this.renderComponents(schemaData);
   }
   render() {
     const { width, height, pickerOver } = this.props;

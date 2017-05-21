@@ -4,11 +4,13 @@ import { connect } from 'react-redux';
 // import { batchActions } from 'redux-batched-actions';
 import assign from 'lodash/assign';
 import uniqueId from 'lodash/uniqueId';
+import isEqual from 'lodash/isEqual';
+import pick from 'lodash/pick';
 
 import { schemaAction } from '../actions/';
 import ComponentStore from '../components/component-store/';
 import ComponentPicker from '../components/component-picker/';
-import { selectActiveComponentsIndex } from '../selectors/';
+import { selectFocusComponent } from '../selectors/';
 
 import * as VComponents from '../../visual-components';
 
@@ -23,14 +25,10 @@ class PickerPane extends PureComponent {
     className: '',
     addComponentToSchema() {},
     canvasDimension: undefined,
-    activeComponentsIndex: {},
+    focusComponent: {},
   }
   static propTypes = {
     className: PropTypes.string,
-    position: PropTypes.shape({
-      x: PropTypes.number,
-      y: PropTypes.number,
-    }),
     addComponentToSchema: PropTypes.func,
     canvasDimension: PropTypes.shape({
       top: PropTypes.number,
@@ -38,19 +36,42 @@ class PickerPane extends PureComponent {
       bottom: PropTypes.number,
       left: PropTypes.number,
     }),
-    activeComponentsIndex: PropTypes.object,
+    focusComponent: PropTypes.shape({
+      id: PropTypes.string,
+      pid: PropTypes.string,
+      index: PropTypes.number,
+    }),
+  }
+  shouldComponentUpdate(nextProps) {
+    const pickPropsList = ['canvasDimension'];
+    return !isEqual(pick(nextProps, pickPropsList), pick(this.props, pickPropsList));
+  }
+  handleAddComponent = (componentData) => {
+    const { addComponentToSchema, focusComponent } = this.props;
+    const info = {
+      pid: null,
+      index: -1,
+    };
+    if (focusComponent.id) {
+      assign(info, {
+        pid: focusComponent.pid,
+        index: focusComponent.index + 1,
+      });
+    }
+    addComponentToSchema(assign(componentData, info, {
+      id: uniqueId(componentData.componentName),
+    }));
   }
   renderComponentPicker = ({ name, prototype }) => {
-    const { canvasDimension, addComponentToSchema, activeComponentsIndex } = this.props;
+    const { canvasDimension } = this.props;
     const pickerProps = {
       name,
       prototype,
       key: name,
       canvasDimension,
-      addComponentToSchema,
-      activeComponentsIndex,
+      addComponent: this.handleAddComponent,
     };
-    return <ComponentPicker {...pickerProps} />
+    return <ComponentPicker {...pickerProps} />;
   }
   render() {
     const { className } = this.props;
@@ -72,20 +93,18 @@ class PickerPane extends PureComponent {
 function mapStateToProps(state) {
   return {
     canvasDimension: state.canvasDimension,
-    activeComponentsIndex: selectActiveComponentsIndex(state),
-  }
+    focusComponent: selectFocusComponent(state),
+  };
 }
 function mapDispatchToProps(dispatch) {
   return {
     addComponentToSchema(payload) {
-      dispatch(schemaAction.addComponentToSchema(assign({}, payload, {
-        id: uniqueId(payload.componentName),
-      })));
+      dispatch(schemaAction.addComponentToSchema(payload));
     },
-  }
+  };
 }
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
 )(PickerPane);

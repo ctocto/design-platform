@@ -4,6 +4,8 @@ import {
   CANVAS_DIMENSION_UPDATE,
   CANVAS_ADD_ACTIVE_COMPONENT,
   CANVAS_REMOVE_ACTIVE_COMPONENT,
+  CANVAS_ADD_FOCUS_COMPONENT,
+  CANVAS_REMOVE_FOCUS_COMPONENT,
   CANVAS_START_DRAGGING,
   CANVAS_STOP_DRAGGING,
 } from '../actions/actionTypes';
@@ -18,25 +20,31 @@ function dimension(state = {}, action) {
 }
 
 function status(state = {
-  activeComponents: [],
+  activeComponent: null,
+  focusComponent: null,
   dragging: false,
 }, action) {
-  let activeComponents;
+  // let activeComponents;
   switch (action.type) {
     case CANVAS_ADD_ACTIVE_COMPONENT:
-      if (state.activeComponents.includes(action.payload)) {
-        activeComponents = [...state.activeComponents];
-      } else {
-        activeComponents = [...state.activeComponents, action.payload];
-      }
       return {
         ...state,
-        activeComponents,
+        activeComponent: action.payload,
       };
     case CANVAS_REMOVE_ACTIVE_COMPONENT:
       return {
         ...state,
-        activeComponents: without(state.activeComponents, action.payload),
+        activeComponent: null,
+      };
+    case CANVAS_ADD_FOCUS_COMPONENT:
+      return {
+        ...state,
+        focusComponent: action.payload,
+      };
+    case CANVAS_REMOVE_FOCUS_COMPONENT:
+      return {
+        ...state,
+        focusComponent: null,
       };
     case CANVAS_START_DRAGGING:
       return {

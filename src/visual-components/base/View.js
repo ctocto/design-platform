@@ -2,50 +2,65 @@ import { Component } from 'react';
 import { PropTypes } from 'prop-types';
 import classnames from 'classnames';
 import Draggable from 'react-draggable';
+import isEqual from 'lodash/isEqual';
 import styles from './View.css';
 import Drag from './drag.svg';
+import Canvas from '../../app/components/canvas/';
 
 export default class BaseView extends Component {
   static defaultProps = {
+    id: null,
     active: false,
+    focus: false,
     dragging: false,
-    mouseEnter() {},
-    mouseLeave() {},
-    startDragging() {},
-    stopDragging() {},
+    canvas: null,
   }
   static propTypes = {
+    id: PropTypes.string,
     active: PropTypes.bool,
+    focus: PropTypes.bool,
     dragging: PropTypes.bool,
-    mouseEnter: PropTypes.func,
-    mouseLeave: PropTypes.func,
-    startDragging: PropTypes.func,
-    stopDragging: PropTypes.func,
+    canvas: PropTypes.instanceOf(Canvas),
   }
-  handleMouseEnter = (e) => {
-    const { dragging } = this.props;
-    if (!dragging) {
-      this.props.mouseEnter();
-    }
+  shouldComponentUpdate(nextProps) {
+    return !isEqual(nextProps, this.props);
   }
-  handleMouseLeave = (e) => {
-    const { dragging } = this.props;
-    if (!dragging) {
-      this.props.mouseLeave();
+  handleClick = () => {
+    const { canvas, id } = this.props;
+    canvas.props.setComponentActive(id);
+  }
+  handleMouseEnter = () => {
+    this.moveTimer = setTimeout(() => {
+      const { canvas, id } = this.props;
+      canvas.props.setFocus(id);
+      this.moveTimer = null;
+    }, 200);
+  }
+  handleMouseLeave = () => {
+    if (this.moveTimer) {
+      clearTimeout(this.moveTimer);
+      this.moveTimer = null;
+    } else {
+      const { canvas, id } = this.props;
+      canvas.props.setUnfocus(id);
     }
   }
   handleStartDrag = () => {
-    this.props.startDragging();
+    const { canvas, id } = this.props;
+    canvas.props.setComponentActive(id);
+    canvas.props.startDragging();
   }
   handleStopDrag = () => {
-    this.props.stopDragging();
+    const { canvas } = this.props;
+    canvas.props.stopDragging();
   }
   render() {
-    const { active } = this.props;
+    const { active, focus } = this.props;
     const wrapperProps = {
       className: styles.Component__wrapper,
       onMouseEnter: this.handleMouseEnter,
       onMouseLeave: this.handleMouseLeave,
+      onClick: this.handleClick,
     };
     const viewContent = (
       <div {...wrapperProps}>
@@ -54,7 +69,8 @@ export default class BaseView extends Component {
             styles.Component__actionCover,
             {
               [styles['Component__actionCover--active']]: active,
-            }
+              [styles['Component__actionCover--focus']]: focus,
+            },
           )}
         >
           <button
@@ -69,19 +85,15 @@ export default class BaseView extends Component {
         {this.renderView()}
       </div>
     );
-    if (active) {
-      return (
-        <Draggable
-          position={{x: 0, y: 0}}
-          handle={`.${styles.Component__dragControl}`}
-          onStart={this.handleStartDrag}
-          onStop={this.handleStopDrag}
-        >
-          {viewContent}
-        </Draggable>
-      );
-    } else {
-      return viewContent;
-    }
+    return (
+      <Draggable
+        position={{ x: 0, y: 0 }}
+        handle={`.${styles.Component__dragControl}`}
+        onStart={this.handleStartDrag}
+        onStop={this.handleStopDrag}
+      >
+        {viewContent}
+      </Draggable>
+    );
   }
 }

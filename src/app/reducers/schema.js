@@ -57,9 +57,18 @@ function schema(state = initialState, action) {
         result,
       };
     case SCHEMA_REMOVE_COMPONENT:
-      return {};
+      return state;
     case SCHEMA_UPDATE_COMPONENT:
-      return {};
+      if (!payload.focusComponent) {
+        // return origin state if focus component is null
+        return state;
+      } else {
+        // TODO: find the new position by focus component
+        const { result } = state;
+        const { components } = state.entities;
+        console.log(components, result);
+        return state;
+      }
     default:
       return state;
   }
