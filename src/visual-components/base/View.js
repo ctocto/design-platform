@@ -12,7 +12,6 @@ export default class BaseView extends Component {
     id: null,
     active: false,
     focus: false,
-    dragging: false,
     canvas: null,
     store: undefined,
   }
@@ -20,7 +19,6 @@ export default class BaseView extends Component {
     id: PropTypes.string,
     active: PropTypes.bool,
     focus: PropTypes.bool,
-    dragging: PropTypes.bool,
     canvas: PropTypes.instanceOf(Canvas),
     store: PropTypes.object,
   }

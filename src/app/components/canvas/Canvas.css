@@ -1,6 +1,11 @@
 .canvas {
   border: 1px solid #000;
 }
-.canvas--pickerOver {
-  border: 1px solid #f00;
+.canvas__componentContainer {
+
+}
+.canvas__componentContainer--focus {
+  margin: 10px;
+  min-height: 1em;
+  border: 1px dashed #03f;
 }

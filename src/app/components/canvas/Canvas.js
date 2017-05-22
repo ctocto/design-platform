@@ -15,8 +15,6 @@ class Canvas extends Component {
     onDimensionUpdate: () => {},
     setFocus: () => {},
     setUnfocus: () => {},
-    pickerOver: false,
-    currentPicker: undefined,
     schemaData: [],
     activeComponent: null,
     focusComponent: null,
@@ -31,8 +29,6 @@ class Canvas extends Component {
     onDimensionUpdate: PropTypes.func,
     setFocus: PropTypes.func,
     setUnfocus: PropTypes.func,
-    pickerOver: PropTypes.bool,
-    currentPicker: PropTypes.string,
     schemaData: PropTypes.array,
     activeComponent: PropTypes.string,
     focusComponent: PropTypes.string,
@@ -64,23 +60,34 @@ class Canvas extends Component {
     const {
       activeComponent,
       focusComponent,
-      dragging,
     } = this.props;
     return components.map((c) => {
       const View = VComponents[c.component].View;
+      const protoType = VComponents[c.component].prototype;
       const viewProps = {
         id: c.id,
         key: c.id,
         ...c.props,
         active: activeComponent === c.id,
         focus: focusComponent === c.id,
-        dragging,
         canvas: this,
         store: new Store(c),
       };
+      let innerContent = this.renderComponents(c.children);
+      if (protoType.type === 'container') {
+        innerContent = (
+          <div
+            className={
+              classnames(styles.canvas__componentContainer, {
+                [styles['canvas__componentContainer--focus']]: focusComponent === c.id,
+              })
+            }
+          >{innerContent}</div>
+        );
+      }
       return (
         <View {...viewProps}>
-          {this.renderComponents(c.children)}
+          {innerContent}
         </View>
       );
     });
@@ -90,11 +97,9 @@ class Canvas extends Component {
     return this.renderComponents(schemaData);
   }
   render() {
-    const { width, height, pickerOver } = this.props;
+    const { width, height } = this.props;
     const canvasProps = {
-      className: classnames(styles.canvas, {
-        [styles['canvas--pickerOver']]: pickerOver,
-      }),
+      className: classnames(styles.canvas),
       style: {
         width,
         height,

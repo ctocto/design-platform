@@ -1,7 +1,6 @@
 import assign from 'lodash/assign';
 import {
   TextSetter,
-  BoolSetter,
 } from '../../setters/';
 import { prototype } from '../base/';
 import Icon from './icon.svg';
