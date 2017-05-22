@@ -14,6 +14,7 @@ export default class BaseView extends Component {
     focus: false,
     dragging: false,
     canvas: null,
+    store: undefined,
   }
   static propTypes = {
     id: PropTypes.string,
@@ -21,6 +22,7 @@ export default class BaseView extends Component {
     focus: PropTypes.bool,
     dragging: PropTypes.bool,
     canvas: PropTypes.instanceOf(Canvas),
+    store: PropTypes.object,
   }
   shouldComponentUpdate(nextProps) {
     return !isEqual(nextProps, this.props);
@@ -34,7 +36,7 @@ export default class BaseView extends Component {
       const { canvas, id } = this.props;
       canvas.props.setFocus(id);
       this.moveTimer = null;
-    }, 200);
+    }, 100);
   }
   handleMouseLeave = () => {
     if (this.moveTimer) {
@@ -91,6 +93,7 @@ export default class BaseView extends Component {
         handle={`.${styles.Component__dragControl}`}
         onStart={this.handleStartDrag}
         onStop={this.handleStopDrag}
+        defaultClassNameDragging={styles['Component--dragging']}
       >
         {viewContent}
       </Draggable>

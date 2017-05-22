@@ -9,7 +9,7 @@ const DevTools = createDevTools(
     toggleVisibilityKey={'ctrl-h'}
     changePositionKey={'ctrl-p'}
     changeMonitorKey={'ctrl-m'}
-    defaultIsVisible
+    defaultIsVisible={false}
   >
     <ChartMonitor />
     <FilterableLogMonitor />

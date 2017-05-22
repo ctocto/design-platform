@@ -1,5 +1,5 @@
 const path = require('path');
-const htmlWebpackPlugin = require('html-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const postcssNextPlugin = require('postcss-cssnext');
 
 const context = path.resolve(__dirname, 'src');
@@ -9,13 +9,29 @@ const babelOptions = {
       'env',
       {
         targets: {
-          browsers: 'last 2 versions',
+          browsers: [
+            'last 2 Chrome versions',
+            'last 1 Firefox versions',
+            'last 1 Safari versions',
+            'last 1 Edge versions',
+          ],
         },
+        useBuiltIns: true,
         modules: false,
+        debug: true,
       },
     ],
     'react',
-    'stage-1',
+  ],
+  plugins: [
+    [
+      'transform-object-rest-spread',
+      {
+        useBuiltIns: true,
+      },
+    ],
+    'transform-class-properties',
+    'transform-export-extensions',
   ],
 };
 
@@ -85,7 +101,7 @@ module.exports = {
   },
   devtool: 'cheap-source-map',
   plugins: [
-    new htmlWebpackPlugin({
+    new HtmlWebpackPlugin({
       filename: 'index.html',
       template: './index.html',
       showErrors: true,

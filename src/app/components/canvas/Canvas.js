@@ -1,8 +1,10 @@
 import { Component } from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
+import get from 'lodash/get';
 
 import * as VComponents from '../../../visual-components';
+import Store from '../../store/';
 
 import styles from './Canvas.css';
 
@@ -74,8 +76,13 @@ class Canvas extends Component {
         focus: focusComponent === c.id,
         dragging,
         canvas: this,
+        store: new Store(c),
       };
-      return <View {...viewProps}>{this.renderComponents(c.children)}</View>;
+      return (
+        <View {...viewProps}>
+          {this.renderComponents(c.children)}
+        </View>
+      );
     });
   }
   renderSchema() {

@@ -73,43 +73,39 @@ class Stage extends PureComponent {
   }
 }
 
-const mapStateToProps = (state) => {
-  return {
-    schemaData: selectSchema(state),
-    activeComponent: state.canvasStatus.activeComponent,
-    focusComponent: state.canvasStatus.focusComponent,
-    dragging: state.canvasStatus.dragging,
-  };
-};
+const mapStateToProps = state => ({
+  schemaData: selectSchema(state),
+  activeComponent: state.canvasStatus.activeComponent,
+  focusComponent: state.canvasStatus.focusComponent,
+  dragging: state.canvasStatus.dragging,
+});
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    onDimensionUpdate: (dimension) => {
-      dispatch(canvasAction.updateCanvasDimension(dimension));
-    },
-    addFocusComponent: (id) => {
-      dispatch(canvasAction.addFocusComponent(id));
-    },
-    removeFocusComponent: (id) => {
-      dispatch(canvasAction.removeFocusComponent(id));
-    },
-    setComponentActive: (id) => {
-      dispatch(canvasAction.addActiveComponent(id));
-    },
-    startDragging: () => {
-      dispatch(canvasAction.startDragging());
-    },
-    stopDraggingAndUpdateSchemaIfNecessary: (activeComponent, focusComponent) => {
-      dispatch(batchActions([
-        canvasAction.stopDragging(),
-        schemaAction.updateComponentInSchema({
-          activeComponent,
-          focusComponent,
-        }),
-      ]));
-    },
-  };
-};
+const mapDispatchToProps = dispatch => ({
+  onDimensionUpdate: (dimension) => {
+    dispatch(canvasAction.updateCanvasDimension(dimension));
+  },
+  addFocusComponent: (id) => {
+    dispatch(canvasAction.addFocusComponent(id));
+  },
+  removeFocusComponent: (id) => {
+    dispatch(canvasAction.removeFocusComponent(id));
+  },
+  setComponentActive: (id) => {
+    dispatch(canvasAction.addActiveComponent(id));
+  },
+  startDragging: () => {
+    dispatch(canvasAction.startDragging());
+  },
+  stopDraggingAndUpdateSchemaIfNecessary: (activeComponent, focusComponent) => {
+    dispatch(batchActions([
+      canvasAction.stopDragging(),
+      schemaAction.updateComponentInSchema({
+        activeComponent,
+        focusComponent,
+      }),
+    ]));
+  },
+});
 
 export default connect(
   mapStateToProps,

@@ -33,3 +33,6 @@
 .Component__dragControl {
   cursor: move;
 }
+.Component--dragging {
+  pointer-events: none;
+}

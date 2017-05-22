@@ -62,12 +62,10 @@ export default class ComponentPicker extends Component {
           dragInCanvas: false,
         });
       }
-    } else {
-      if (this.calculatePickerIsInCanvas(pos)) {
-        this.setState({
+    } else if (this.calculatePickerIsInCanvas(pos)) {
+      this.setState({
           dragInCanvas: true,
         });
-      }
     }
   }
   onStop = (e, data) => {
@@ -78,10 +76,8 @@ export default class ComponentPicker extends Component {
       });
       const { name } = this.props;
       const componentName = name;
-      const componentProps = {};
       this.props.addComponent({
         componentName,
-        componentProps,
       });
     }
   }
@@ -93,7 +89,7 @@ export default class ComponentPicker extends Component {
         className={classnames(styles.grid__draglayer, {
           [styles['grid__draglayer--oncanvas']]: dragInCanvas,
         })}
-      ></div>
+      />
     );
   }
   render() {
@@ -104,7 +100,7 @@ export default class ComponentPicker extends Component {
         <div className={styles.grid__icon}>{ prototype.icon }</div>
         <p>{prototype.name}</p>
         <Draggable
-          position={{x: 0, y: 0}}
+          position={{ x: 0, y: 0 }}
           onStart={this.onStart}
           onDrag={this.onDrag}
           onStop={this.onStop}

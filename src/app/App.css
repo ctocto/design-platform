@@ -23,7 +23,7 @@ html, body, :global(#App) {
   order: 0;
   flex: 0 0 128px;
 }
-.rightPane {
+.configPane {
   order: 2;
   flex: 0 0 100px;
 }

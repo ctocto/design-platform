@@ -6,6 +6,7 @@ import assign from 'lodash/assign';
 import uniqueId from 'lodash/uniqueId';
 import isEqual from 'lodash/isEqual';
 import pick from 'lodash/pick';
+import get from 'lodash/get';
 
 import { schemaAction } from '../actions/';
 import ComponentStore from '../components/component-store/';
@@ -58,8 +59,22 @@ class PickerPane extends PureComponent {
         index: focusComponent.index + 1,
       });
     }
+    
+    const configers = get(VComponents, [
+      componentData.componentName,
+      'prototype',
+      'configers',
+    ], []);
+    const initialProps = {};
+    configers.forEach((config) => {
+      assign(initialProps, {
+        [config.name]: config.defaultValue,
+      });
+    });
+
     addComponentToSchema(assign(componentData, info, {
       id: uniqueId(componentData.componentName),
+      componentProps: initialProps,
     }));
   }
   renderComponentPicker = ({ name, prototype }) => {
@@ -90,19 +105,15 @@ class PickerPane extends PureComponent {
   }
 }
 
-function mapStateToProps(state) {
-  return {
-    canvasDimension: state.canvasDimension,
-    focusComponent: selectFocusComponent(state),
-  };
-}
-function mapDispatchToProps(dispatch) {
-  return {
-    addComponentToSchema(payload) {
-      dispatch(schemaAction.addComponentToSchema(payload));
-    },
-  };
-}
+const mapStateToProps = state => ({
+  canvasDimension: state.canvasDimension,
+  focusComponent: selectFocusComponent(state),
+});
+const mapDispatchToProps = dispatch => ({
+  addComponentToSchema(payload) {
+    dispatch(schemaAction.addComponentToSchema(payload));
+  },
+});
 
 export default connect(
   mapStateToProps,
