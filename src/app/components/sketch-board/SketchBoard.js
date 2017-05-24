@@ -154,7 +154,8 @@ export default class SketchBoard extends Component {
   }
   renderSchema() {
     const { schemaData } = this.props;
-    // this.componentRefs = {};
+    this.componentRefs = {};
+    this.dockerRefs = {};
     return this.renderComponents(schemaData);
   }
   render() {
