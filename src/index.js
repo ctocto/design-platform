@@ -16,8 +16,8 @@ const logger = createLogger({
 const monitorReducer = (state = {}, action) => state;
 
 const enhancer = compose(
-  // applyMiddleware(thunk.withExtraArgument(), logger),
-  applyMiddleware(thunk.withExtraArgument()),
+  applyMiddleware(thunk.withExtraArgument(), logger),
+  // applyMiddleware(thunk.withExtraArgument()),
   DevTools.instrument(monitorReducer, {
     maxAge: 50,
     shouldCatchErrors: true,

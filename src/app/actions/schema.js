@@ -8,8 +8,8 @@ import {
 
 export const {
   schemaAddComponent: addComponentToSchema,
-  schemaRemoveComponent: removeComponentFromSchema,
-  schemaUpdateComponent: updateComponentInSchema,
+  schemaRemoveComponent: removeComponent,
+  schemaUpdateComponent: updateComponent,
   schemaUpdateProps: updateComponentProps,
 } = createActions(
   SCHEMA_ADD_COMPONENT,

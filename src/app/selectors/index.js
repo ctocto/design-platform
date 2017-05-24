@@ -55,20 +55,20 @@ export const selectActiveComponent = createSelector(
 export const selectFocusComponent = createSelector(
   [getNormalizedSchema, getFocusComponent],
   (normalizedSchema, id) => {
-    const res = {};
+    const res = {
+      id,
+    };
     if (id) {
       if (normalizedSchema.result.includes(id)) {
         assign(res, {
-          id,
           pid: null,
           index: normalizedSchema.result.indexOf(id),
         });
       } else {
         Object.keys(normalizedSchema.entities.components).some((pid) => {
           if (pid !== id) {
-            if (normalizedSchema.entities.components[pid].children.includes[id]) {
+            if (normalizedSchema.entities.components[pid].children.includes(id)) {
               assign(res, {
-                id,
                 pid,
                 index: normalizedSchema.entities.components[pid].children.indexOf(id),
               });

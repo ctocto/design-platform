@@ -1,7 +1,7 @@
 import { createDevTools } from 'redux-devtools';
 
+import LogMonitor from 'redux-devtools-log-monitor';
 import DockMonitor from 'redux-devtools-dock-monitor';
-import FilterableLogMonitor from 'redux-devtools-filterable-log-monitor';
 import ChartMonitor from 'redux-devtools-chart-monitor';
 
 const DevTools = createDevTools(
@@ -12,7 +12,7 @@ const DevTools = createDevTools(
     defaultIsVisible={false}
   >
     <ChartMonitor />
-    <FilterableLogMonitor />
+    <LogMonitor />
   </DockMonitor>
 );
 

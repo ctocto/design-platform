@@ -1,0 +1,11 @@
+.Docker__wrapper {
+  margin: 5px;
+  width: calc(100% - 10px);
+  height: calc(100% - 10px);
+  min-height: 1.5rem;
+  border: 1px dashed #ccc;
+  box-sizing: border-box;
+}
+.Docker__wrapper--active {
+  border-color: #6a87ff;
+}

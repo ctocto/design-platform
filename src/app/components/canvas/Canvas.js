@@ -1,8 +1,10 @@
 import { Component } from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
-import get from 'lodash/get';
+import Draggable from 'react-draggable';
+import findKey from 'lodash/findKey';
 
+import ControlLayer from './ControlLayer';
 import * as VComponents from '../../../visual-components';
 import Store from '../../store/';
 
@@ -12,15 +14,15 @@ class Canvas extends Component {
   static defaultProps = {
     width: 600,
     height: 400,
-    onDimensionUpdate: () => {},
-    setFocus: () => {},
-    setUnfocus: () => {},
+    onDimensionUpdate() {},
+    setFocus() {},
     schemaData: [],
     activeComponent: null,
     focusComponent: null,
-    setComponentActive() {},
-    startDragging: () => {},
-    stopDragging: () => {},
+    setActiveComponent() {},
+    startDragging() {},
+    stopDragging() {},
+    removeComponent() {},
     dragging: false,
   }
   static propTypes = {
@@ -28,15 +30,17 @@ class Canvas extends Component {
     height: PropTypes.number,
     onDimensionUpdate: PropTypes.func,
     setFocus: PropTypes.func,
-    setUnfocus: PropTypes.func,
     schemaData: PropTypes.array,
     activeComponent: PropTypes.string,
     focusComponent: PropTypes.string,
-    setComponentActive: PropTypes.func,
+    setActiveComponent: PropTypes.func,
     startDragging: PropTypes.func,
     stopDragging: PropTypes.func,
+    removeComponent: PropTypes.func,
     dragging: PropTypes.bool,
   }
+  componentRefs = {}
+  dockerRefs = {}
   componentDidMount() {
     this.handleUpdate();
   }
@@ -56,44 +60,101 @@ class Canvas extends Component {
       bottom: rect.bottom,
     });
   }
+  handleMouseOver = (e) => {
+    const { setFocus } = this.props;
+    let element = e.target;
+    let matchComponentId;
+    let isDockerMatch = false;
+    while (element !== this.el) {
+      matchComponentId = findKey(this.componentRefs, node => (node === element));
+      if (matchComponentId) break;
+      matchComponentId = findKey(this.dockerRefs, node => (node === element));
+      if (matchComponentId) {
+        isDockerMatch = true;
+        break;
+      }
+      element = element.parentElement;
+    }
+    // console.log('matchComponentId', matchComponentId, isDockerMatch);
+    if (matchComponentId) {
+      setFocus(matchComponentId, isDockerMatch ? 'INSERT' : 'APPEND');
+    } else {
+      setFocus(matchComponentId, 'APPEND');
+    }
+  }
+  handleControlClick(id, type) {
+    switch (type) {
+      case 'delete':
+        this.props.removeComponent(id);
+        break;
+      default:
+        break;
+    }
+  }
   renderComponents(components) {
     const {
       activeComponent,
       focusComponent,
+      dragging,
+      setActiveComponent,
+      startDragging,
+      stopDragging,
     } = this.props;
     return components.map((c) => {
-      const View = VComponents[c.component].View;
-      const protoType = VComponents[c.component].prototype;
+      const View = VComponents[c.component].PrototypeView;
       const viewProps = {
         id: c.id,
-        key: c.id,
         ...c.props,
-        active: activeComponent === c.id,
-        focus: focusComponent === c.id,
-        canvas: this,
         store: new Store(c),
+        dockerRef: el => (this.dockerRefs[c.id] = el),
       };
-      let innerContent = this.renderComponents(c.children);
-      if (protoType.type === 'container') {
-        innerContent = (
-          <div
-            className={
-              classnames(styles.canvas__componentContainer, {
-                [styles['canvas__componentContainer--focus']]: focusComponent === c.id,
-              })
-            }
-          >{innerContent}</div>
-        );
-      }
+      const innerContent = this.renderComponents(c.children);
+      const active = activeComponent === c.id;
+      const focus = focusComponent === c.id;
+      const isCurrentDragComponent = dragging && active;
+      const dragProps = {
+        key: c.id,
+        position: { x: 0, y: 0 },
+        onStart() {
+          if (!active) {
+            setActiveComponent(c.id);
+          }
+          startDragging();
+        },
+        onStop() {
+          stopDragging();
+        },
+        handle: `.control-handler-${c.id}`,
+        disabled: dragging && !active,
+      };
+      const controlProps = {
+        id: c.id,
+        componentRef: el => (this.componentRefs[c.id] = el),
+        active,
+        focus,
+        dragging: isCurrentDragComponent,
+        handleClick(e) {
+          e.stopPropagation();
+          if (!active) {
+            setActiveComponent(c.id);
+          }
+        },
+        handleControlClick: this.handleControlClick.bind(this, c.id),
+      };
       return (
-        <View {...viewProps}>
-          {innerContent}
-        </View>
+        <Draggable {...dragProps}>
+          <ControlLayer {...controlProps}>
+            <View {...viewProps}>
+              {innerContent}
+            </View>
+          </ControlLayer>
+        </Draggable>
       );
     });
   }
   renderSchema() {
     const { schemaData } = this.props;
+    // this.componentRefs = {};
     return this.renderComponents(schemaData);
   }
   render() {
@@ -105,6 +166,7 @@ class Canvas extends Component {
         height,
       },
       ref: node => (this.el = node),
+      onMouseOver: this.handleMouseOver,
     };
     return (
       <div {...canvasProps}>

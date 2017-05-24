@@ -1,11 +1,8 @@
 import assign from 'lodash/assign';
-import without from 'lodash/without';
 import {
   CANVAS_DIMENSION_UPDATE,
-  CANVAS_ADD_ACTIVE_COMPONENT,
-  CANVAS_REMOVE_ACTIVE_COMPONENT,
-  CANVAS_ADD_FOCUS_COMPONENT,
-  CANVAS_REMOVE_FOCUS_COMPONENT,
+  CANVAS_SET_ACTIVE_COMPONENT,
+  CANVAS_SET_FOCUS_COMPONENT,
   CANVAS_START_DRAGGING,
   CANVAS_STOP_DRAGGING,
 } from '../actions/actionTypes';
@@ -22,29 +19,21 @@ function dimension(state = {}, action) {
 function status(state = {
   activeComponent: null,
   focusComponent: null,
+  focusType: 'APPEND',
   dragging: false,
 }, action) {
-  // let activeComponents;
+  const { payload } = action;
   switch (action.type) {
-    case CANVAS_ADD_ACTIVE_COMPONENT:
+    case CANVAS_SET_ACTIVE_COMPONENT:
       return {
         ...state,
-        activeComponent: action.payload,
+        activeComponent: payload,
       };
-    case CANVAS_REMOVE_ACTIVE_COMPONENT:
+    case CANVAS_SET_FOCUS_COMPONENT:
       return {
         ...state,
-        activeComponent: null,
-      };
-    case CANVAS_ADD_FOCUS_COMPONENT:
-      return {
-        ...state,
-        focusComponent: action.payload,
-      };
-    case CANVAS_REMOVE_FOCUS_COMPONENT:
-      return {
-        ...state,
-        focusComponent: null,
+        focusComponent: payload.component,
+        focusType: payload.type,
       };
     case CANVAS_START_DRAGGING:
       return {

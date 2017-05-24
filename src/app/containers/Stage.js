@@ -11,44 +11,51 @@ import Canvas from '../components/canvas';
 class Stage extends PureComponent {
   static defaultProps = {
     className: '',
-    onDimensionUpdate: () => {},
-    addFocusComponent: () => {},
-    removeFocusComponent: () => {},
-    setComponentActive: () => {},
+    onDimensionUpdate() {},
+    setFocusComponent() {},
+    setActiveComponent() {},
     schemaData: [],
     activeComponent: null,
     focusComponent: null,
-    startDragging: () => {},
-    stopDraggingAndUpdateSchemaIfNecessary: () => {},
+    focusType: null,
+    startDragging() {},
+    stopDraggingAndUpdateSchema() {},
+    removeComponent() {},
     dragging: false,
   }
   static propTypes = {
     className: PropTypes.string,
     onDimensionUpdate: PropTypes.func,
-    addFocusComponent: PropTypes.func,
-    removeFocusComponent: PropTypes.func,
-    setComponentActive: PropTypes.func,
+    setFocusComponent: PropTypes.func,
+    setActiveComponent: PropTypes.func,
     schemaData: PropTypes.array,
     activeComponent: PropTypes.string,
-    focusComponent:PropTypes.string,
+    focusComponent: PropTypes.string,
+    focusType: PropTypes.oneOf(['APPEND', 'INSERT']),
     startDragging: PropTypes.func,
-    stopDraggingAndUpdateSchemaIfNecessary: PropTypes.func,
+    stopDraggingAndUpdateSchema: PropTypes.func,
+    removeComponent: PropTypes.func,
     dragging: PropTypes.bool,
   }
   handleStopDragging = () => {
-    const { activeComponent, focusComponent, stopDraggingAndUpdateSchemaIfNecessary } = this.props;
-    stopDraggingAndUpdateSchemaIfNecessary(activeComponent, focusComponent);
+    const {
+      activeComponent,
+      focusComponent,
+      focusType,
+      stopDraggingAndUpdateSchema,
+    } = this.props;
+    stopDraggingAndUpdateSchema(activeComponent, focusComponent, focusType);
   }
   render() {
     const {
       className,
       onDimensionUpdate,
-      addFocusComponent,
-      removeFocusComponent,
-      setComponentActive,
+      setFocusComponent,
+      setActiveComponent,
       schemaData,
       activeComponent,
       focusComponent,
+      removeComponent,
       startDragging,
       dragging,
     } = this.props;
@@ -58,11 +65,11 @@ class Stage extends PureComponent {
     const canvasProps = {
       schemaData,
       onDimensionUpdate,
-      setFocus: addFocusComponent,
-      setUnfocus: removeFocusComponent,
-      setComponentActive,
+      setFocus: setFocusComponent,
+      setActiveComponent,
       activeComponent,
       focusComponent,
+      removeComponent,
       startDragging,
       stopDragging: this.handleStopDragging,
       dragging,
@@ -77,6 +84,7 @@ const mapStateToProps = state => ({
   schemaData: selectSchema(state),
   activeComponent: state.canvasStatus.activeComponent,
   focusComponent: state.canvasStatus.focusComponent,
+  focusType: state.canvasStatus.focusType,
   dragging: state.canvasStatus.dragging,
 });
 
@@ -84,25 +92,32 @@ const mapDispatchToProps = dispatch => ({
   onDimensionUpdate: (dimension) => {
     dispatch(canvasAction.updateCanvasDimension(dimension));
   },
-  addFocusComponent: (id) => {
-    dispatch(canvasAction.addFocusComponent(id));
+  setFocusComponent: (id, type) => {
+    dispatch(canvasAction.setFocusComponent({
+      component: id,
+      type,
+    }));
   },
-  removeFocusComponent: (id) => {
-    dispatch(canvasAction.removeFocusComponent(id));
-  },
-  setComponentActive: (id) => {
-    dispatch(canvasAction.addActiveComponent(id));
+  setActiveComponent: (id) => {
+    dispatch(canvasAction.setActiveComponent(id));
   },
   startDragging: () => {
     dispatch(canvasAction.startDragging());
   },
-  stopDraggingAndUpdateSchemaIfNecessary: (activeComponent, focusComponent) => {
+  stopDraggingAndUpdateSchema: (activeComponent, focusComponent, focusType) => {
     dispatch(batchActions([
       canvasAction.stopDragging(),
-      schemaAction.updateComponentInSchema({
+      schemaAction.updateComponent({
         activeComponent,
         focusComponent,
+        focusType,
       }),
+    ]));
+  },
+  removeComponent: (id) => {
+    dispatch(batchActions([
+      canvasAction.setActiveComponent(null),
+      schemaAction.removeComponent(id),
     ]));
   },
 });

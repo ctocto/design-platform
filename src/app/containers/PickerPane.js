@@ -27,6 +27,8 @@ class PickerPane extends PureComponent {
     addComponentToSchema() {},
     canvasDimension: undefined,
     focusComponent: {},
+    focusType: null,
+    // activeDocker: null,
   }
   static propTypes = {
     className: PropTypes.string,
@@ -42,24 +44,34 @@ class PickerPane extends PureComponent {
       pid: PropTypes.string,
       index: PropTypes.number,
     }),
+    focusType: PropTypes.oneOf(['INSERT', 'APPEND']),
+    // activeDocker: PropTypes.shape({
+    //   id: PropTypes.string,
+    //   index: PropTypes.number,
+    // }),
   }
   shouldComponentUpdate(nextProps) {
     const pickPropsList = ['canvasDimension'];
     return !isEqual(pick(nextProps, pickPropsList), pick(this.props, pickPropsList));
   }
   handleAddComponent = (componentData) => {
-    const { addComponentToSchema, focusComponent } = this.props;
+    const { addComponentToSchema, focusComponent, focusType } = this.props;
     const info = {
       pid: null,
       index: -1,
     };
     if (focusComponent.id) {
-      assign(info, {
-        pid: focusComponent.pid,
-        index: focusComponent.index + 1,
-      });
+      if (focusType === 'INSERT') {
+        assign(info, {
+          pid: focusComponent.id,
+        });
+      } else {
+        assign(info, {
+          pid: focusComponent.pid,
+          index: focusComponent.index + 1,
+        });
+      }
     }
-    
     const configers = get(VComponents, [
       componentData.componentName,
       'prototype',
@@ -71,6 +83,13 @@ class PickerPane extends PureComponent {
         [config.name]: config.defaultValue,
       });
     });
+
+    // if (activeDocker) {
+    //   assign(info, {
+    //     pid: activeDocker.id,
+    //     index: activeDocker.index,
+    //   });
+    // }
 
     addComponentToSchema(assign(componentData, info, {
       id: uniqueId(componentData.componentName),
@@ -108,6 +127,8 @@ class PickerPane extends PureComponent {
 const mapStateToProps = state => ({
   canvasDimension: state.canvasDimension,
   focusComponent: selectFocusComponent(state),
+  focusType: state.canvasStatus.focusType,
+  // activeDocker: state.canvasStatus.activeDocker,
 });
 const mapDispatchToProps = dispatch => ({
   addComponentToSchema(payload) {

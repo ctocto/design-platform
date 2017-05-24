@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import classnames from 'classnames';
 
 import styles from './ComponentPicker.css';
-import * as VComponents from '../../../visual-components';
 
 export default class ComponentPicker extends Component {
   static defaultProps = {
@@ -26,18 +25,6 @@ export default class ComponentPicker extends Component {
   }
   state = {
     dragInCanvas: false,
-  }
-  calculatePickerIsInCanvas(pos) {
-    const { canvasDimension } = this.props;
-    if (!(pos && this.originPos && canvasDimension)) return false;
-    if ((this.originPos.bottom + pos.y >= canvasDimension.top)
-      && (this.originPos.top + pos.y <= canvasDimension.bottom)) {
-      if ((this.originPos.right + pos.x >= canvasDimension.left)
-      && (this.originPos.left + pos.x <= canvasDimension.right)) {
-        return true;
-      }
-    }
-    return false;
   }
   onStart = (e, data) => {
     const rect = data.node.getBoundingClientRect();
@@ -64,11 +51,11 @@ export default class ComponentPicker extends Component {
       }
     } else if (this.calculatePickerIsInCanvas(pos)) {
       this.setState({
-          dragInCanvas: true,
-        });
+        dragInCanvas: true,
+      });
     }
   }
-  onStop = (e, data) => {
+  onStop = () => {
     const { dragInCanvas } = this.state;
     if (dragInCanvas) {
       this.setState({
@@ -81,8 +68,19 @@ export default class ComponentPicker extends Component {
       });
     }
   }
+  calculatePickerIsInCanvas(pos) {
+    const { canvasDimension } = this.props;
+    if (!(pos && this.originPos && canvasDimension)) return false;
+    if ((this.originPos.bottom + pos.y >= canvasDimension.top)
+      && (this.originPos.top + pos.y <= canvasDimension.bottom)) {
+      if ((this.originPos.right + pos.x >= canvasDimension.left)
+      && (this.originPos.left + pos.x <= canvasDimension.right)) {
+        return true;
+      }
+    }
+    return false;
+  }
   renderDragContent() {
-    let dragContent;
     const { dragInCanvas } = this.state;
     return (
       <div
@@ -94,7 +92,6 @@ export default class ComponentPicker extends Component {
   }
   render() {
     const { name, prototype } = this.props;
-    const { dragInCanvas } = this.state;
     return (
       <div className={styles.grid} key={name}>
         <div className={styles.grid__icon}>{ prototype.icon }</div>

@@ -10,8 +10,6 @@ import { appSchema } from '../schema/';
 
 const initialState = normalize([], appSchema);
 
-console.log('initialState', initialState);
-
 const insert = (array, index, value) => {
   if (index === -1) {
     array.splice(array.length, 0, value);
@@ -31,8 +29,9 @@ const findComponent = (id, result, components) => {
       index: result.indexOf(id),
     });
   } else {
-    components.some((c) => {
-      if (c.id !== id) {
+    Object.keys(components).some((cid) => {
+      const c = components[cid];
+      if (cid !== id) {
         if (c.children.includes(id)) {
           assign(ret, {
             pid: c.id,
@@ -85,25 +84,73 @@ function schema(state = initialState, action) {
         result,
       };
     case SCHEMA_REMOVE_COMPONENT:
-      return state;
+      const removeId = payload;
+      result = [...state.result];
+      if (result.includes(removeId)) {
+        // if the component is in root
+        result = result.filter(id => id !== removeId);
+      } else {
+        // find the parent component
+        Object.keys(components).forEach((cid) => {
+          if (removeId !== cid) {
+            if (components[cid].children.includes(removeId)) {
+              components[cid].children = components[cid].children.filter(id => id !== removeId);
+            }
+          }
+        });
+      }
+      // TODO:
+      //  if the component has children
+      //  need warn the user
+      delete components[removeId];
+      return {
+        result,
+        entities: {
+          components,
+        },
+      };
     case SCHEMA_UPDATE_COMPONENT:
-      const { activeComponent, focusComponent } = payload;
-      if (!focusComponent || focusComponent === activeComponent) {
-        // return origin state if focus component is null
+      const { activeComponent, focusComponent, focusType } = payload;
+      // 0. if has no active component
+      //    or the focus one and the active one is the same component
+      //    then return
+      if (!activeComponent || focusComponent === activeComponent) {
         return state;
       }
       result = [...state.result];
+      // 1. calculate the active component data
       const activeComponentMeta = findComponent(activeComponent, result, components);
+      // 2. shift out active component from the origin container
       if (!activeComponentMeta.pid) {
         result.splice(activeComponentMeta.index, 1);
       } else {
         components[activeComponentMeta.pid].children.splice(activeComponentMeta.index, 1);
       }
-      const focusComponentMeta = findComponent(focusComponent, result, components);
-      if (!focusComponentMeta.pid) {
-        result.splice(focusComponentMeta.index + 1, 0, activeComponentMeta.id);
+
+      // 3. if the focus component is null
+      //    then move the active component to the end of result
+      if (!focusComponent) {
+        result.push(activeComponent);
       } else {
-        components[focusComponentMeta.pid].children.splice(focusComponentMeta.index + 1, 0, activeComponentMeta.id);
+        // 3. if focusType is 'INSERT'
+        //    insert the active component to the focus component's children
+        //    or
+        //    insert active component after the focus component
+        if (focusType === 'INSERT') {
+          components[focusComponent].children.push(activeComponent);
+        } else {
+          // calculate the focus component data
+          const focusComponentMeta = findComponent(focusComponent, result, components);
+          if (!focusComponentMeta.pid) {
+            result.splice(focusComponentMeta.index + 1, 0, activeComponentMeta.id);
+          } else {
+            components[focusComponentMeta.pid].children.splice(
+              focusComponentMeta.index + 1,
+              0,
+              activeComponentMeta.id,
+            );
+          }
+        }
       }
       return {
         result,

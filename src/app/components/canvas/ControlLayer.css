@@ -1,0 +1,41 @@
+.Layer__wrapper {
+  position: relative;
+}
+.Layer__wrapper--focus {
+  border: 1px dashed #f00;
+  & > .Layer__controlBtn {
+    display: block;
+  }
+}
+.Layer__wrapper--active {
+  border: 1px solid #f00;
+  & > .Layer__controlBtn {
+    display: block;
+  }
+}
+.Layer__wrapper--dragging {
+  pointer-events: none;
+}
+
+.Layer__controlBtn {
+  display: none;
+  position: absolute;
+  padding: 0;
+  width: 18px;
+  height: 18px;
+  background: none;
+  border: 1px solid #000;
+  cursor: pointer;
+  &:focus {
+    outline: 0 none;
+  }
+}
+.Layer__deleteBtn {
+  right: 16px;
+  top: -1px;
+}
+.Layer__dragControl {
+  right: -1px;
+  top: -1px;
+  cursor: move;
+}

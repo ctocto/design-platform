@@ -11,9 +11,9 @@ const babelOptions = {
         targets: {
           browsers: [
             'last 2 Chrome versions',
-            'last 1 Firefox versions',
-            'last 1 Safari versions',
-            'last 1 Edge versions',
+            // 'last 1 Firefox versions',
+            // 'last 1 Safari versions',
+            // 'last 1 Edge versions',
           ],
         },
         useBuiltIns: true,
@@ -107,4 +107,7 @@ module.exports = {
       showErrors: true,
     }),
   ],
+  devServer: {
+    contentBase: path.join(__dirname, 'node_modules'),
+  },
 };
