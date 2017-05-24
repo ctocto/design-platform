@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import BaseView from '../base/';
-import { Docker } from '../../app/components/canvas/';
+import { Docker } from '../../app/components/sketch-board/';
 import styles from './View.css';
 
 export default class View extends BaseView {

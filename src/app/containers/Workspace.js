@@ -3,12 +3,11 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { batchActions } from 'redux-batched-actions';
 
-import { canvasAction, schemaAction } from '../actions/';
+import { sketchAction, schemaAction } from '../actions/';
 import { selectSchema } from '../selectors/';
-import Canvas from '../components/canvas';
-// import { selectActiveComponents, selectFocusComponent } from '../selectors/';
+import SketchBoard from '../components/sketch-board/';
 
-class Stage extends PureComponent {
+class Workspace extends PureComponent {
   static defaultProps = {
     className: '',
     onDimensionUpdate() {},
@@ -62,7 +61,7 @@ class Stage extends PureComponent {
     const props = {
       className,
     };
-    const canvasProps = {
+    const sketchBoardProps = {
       schemaData,
       onDimensionUpdate,
       setFocus: setFocusComponent,
@@ -75,38 +74,38 @@ class Stage extends PureComponent {
       dragging,
     };
     return (
-      <div {...props}><Canvas {...canvasProps} /></div>
+      <div {...props}><SketchBoard {...sketchBoardProps} /></div>
     );
   }
 }
 
 const mapStateToProps = state => ({
   schemaData: selectSchema(state),
-  activeComponent: state.canvasStatus.activeComponent,
-  focusComponent: state.canvasStatus.focusComponent,
-  focusType: state.canvasStatus.focusType,
-  dragging: state.canvasStatus.dragging,
+  activeComponent: state.sketchStatus.activeComponent,
+  focusComponent: state.sketchStatus.focusComponent,
+  focusType: state.sketchStatus.focusType,
+  dragging: state.sketchStatus.dragging,
 });
 
 const mapDispatchToProps = dispatch => ({
   onDimensionUpdate: (dimension) => {
-    dispatch(canvasAction.updateCanvasDimension(dimension));
+    dispatch(sketchAction.updateSketchDimension(dimension));
   },
   setFocusComponent: (id, type) => {
-    dispatch(canvasAction.setFocusComponent({
+    dispatch(sketchAction.setFocusComponent({
       component: id,
       type,
     }));
   },
   setActiveComponent: (id) => {
-    dispatch(canvasAction.setActiveComponent(id));
+    dispatch(sketchAction.setActiveComponent(id));
   },
   startDragging: () => {
-    dispatch(canvasAction.startDragging());
+    dispatch(sketchAction.startDragging());
   },
   stopDraggingAndUpdateSchema: (activeComponent, focusComponent, focusType) => {
     dispatch(batchActions([
-      canvasAction.stopDragging(),
+      sketchAction.stopDragging(),
       schemaAction.updateComponent({
         activeComponent,
         focusComponent,
@@ -116,7 +115,7 @@ const mapDispatchToProps = dispatch => ({
   },
   removeComponent: (id) => {
     dispatch(batchActions([
-      canvasAction.setActiveComponent(null),
+      sketchAction.setActiveComponent(null),
       schemaAction.removeComponent(id),
     ]));
   },
@@ -125,4 +124,4 @@ const mapDispatchToProps = dispatch => ({
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(Stage);
+)(Workspace);

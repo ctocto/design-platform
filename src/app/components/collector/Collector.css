@@ -1,7 +1,7 @@
-.pane {
+.Collector {
 
 }
-.pane__body {
+.Collector__body {
   display: flex;
   flex-wrap: wrap;
 }

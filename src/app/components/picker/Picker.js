@@ -3,19 +3,19 @@ import Draggable from 'react-draggable';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 
-import styles from './ComponentPicker.css';
+import styles from './Picker.css';
 
-export default class ComponentPicker extends Component {
+export default class Picker extends Component {
   static defaultProps = {
     name: undefined,
     prototype: undefined,
-    canvasDimension: undefined,
+    sketchDimension: undefined,
     addComponent() {},
   }
   static propTypes = {
     name: PropTypes.string,
     prototype: PropTypes.object,
-    canvasDimension: PropTypes.shape({
+    sketchDimension: PropTypes.shape({
       top: PropTypes.number,
       right: PropTypes.number,
       bottom: PropTypes.number,
@@ -24,7 +24,7 @@ export default class ComponentPicker extends Component {
     addComponent: PropTypes.func,
   }
   state = {
-    dragInCanvas: false,
+    dragInBoard: false,
   }
   onStart = (e, data) => {
     const rect = data.node.getBoundingClientRect();
@@ -42,24 +42,24 @@ export default class ComponentPicker extends Component {
       x: data.x,
       y: data.y,
     };
-    const { dragInCanvas } = this.state;
-    if (dragInCanvas) {
+    const { dragInBoard } = this.state;
+    if (dragInBoard) {
       if (!this.calculatePickerIsInCanvas(pos)) {
         this.setState({
-          dragInCanvas: false,
+          dragInBoard: false,
         });
       }
     } else if (this.calculatePickerIsInCanvas(pos)) {
       this.setState({
-        dragInCanvas: true,
+        dragInBoard: true,
       });
     }
   }
   onStop = () => {
-    const { dragInCanvas } = this.state;
-    if (dragInCanvas) {
+    const { dragInBoard } = this.state;
+    if (dragInBoard) {
       this.setState({
-        dragInCanvas: false,
+        dragInBoard: false,
       });
       const { name } = this.props;
       const componentName = name;
@@ -69,23 +69,23 @@ export default class ComponentPicker extends Component {
     }
   }
   calculatePickerIsInCanvas(pos) {
-    const { canvasDimension } = this.props;
-    if (!(pos && this.originPos && canvasDimension)) return false;
-    if ((this.originPos.bottom + pos.y >= canvasDimension.top)
-      && (this.originPos.top + pos.y <= canvasDimension.bottom)) {
-      if ((this.originPos.right + pos.x >= canvasDimension.left)
-      && (this.originPos.left + pos.x <= canvasDimension.right)) {
+    const { sketchDimension } = this.props;
+    if (!(pos && this.originPos && sketchDimension)) return false;
+    if ((this.originPos.bottom + pos.y >= sketchDimension.top)
+      && (this.originPos.top + pos.y <= sketchDimension.bottom)) {
+      if ((this.originPos.right + pos.x >= sketchDimension.left)
+      && (this.originPos.left + pos.x <= sketchDimension.right)) {
         return true;
       }
     }
     return false;
   }
   renderDragContent() {
-    const { dragInCanvas } = this.state;
+    const { dragInBoard } = this.state;
     return (
       <div
         className={classnames(styles.grid__draglayer, {
-          [styles['grid__draglayer--oncanvas']]: dragInCanvas,
+          [styles['grid__draglayer--oncanvas']]: dragInBoard,
         })}
       />
     );

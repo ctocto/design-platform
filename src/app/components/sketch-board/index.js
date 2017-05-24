@@ -1,2 +1,2 @@
-export { default } from './Canvas';
+export { default } from './SketchBoard';
 export { default as Docker } from './Docker';

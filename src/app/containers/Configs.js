@@ -1,13 +1,12 @@
 import { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import get from 'lodash/get';
 
 import { selectActiveComponent, selectAllComponents } from '../selectors/';
 import Configer from '../components/configer/';
 import Store from '../store/';
 
-class ConfigPane extends PureComponent {
+class Configs extends PureComponent {
   static defaultProps = {
     className: '',
     components: {},
@@ -85,4 +84,4 @@ const mapDispatchToProps = dispatch => ({
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(ConfigPane);
+)(Configs);

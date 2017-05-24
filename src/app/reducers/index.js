@@ -1,10 +1,10 @@
 import { combineReducers } from 'redux';
-import { dimension, status } from './canvas';
+import { dimension, status } from './sketch';
 import { schema } from './schema';
 
 const appReducer = combineReducers({
-  canvasDimension: dimension,
-  canvasStatus: status,
+  sketchDimension: dimension,
+  sketchStatus: status,
   schema,
 });
 

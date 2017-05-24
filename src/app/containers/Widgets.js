@@ -1,7 +1,6 @@
 import { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-// import { batchActions } from 'redux-batched-actions';
 import assign from 'lodash/assign';
 import uniqueId from 'lodash/uniqueId';
 import isEqual from 'lodash/isEqual';
@@ -9,8 +8,8 @@ import pick from 'lodash/pick';
 import get from 'lodash/get';
 
 import { schemaAction } from '../actions/';
-import ComponentStore from '../components/component-store/';
-import ComponentPicker from '../components/component-picker/';
+import Collector from '../components/collector/';
+import Picker from '../components/picker/';
 import { selectFocusComponent } from '../selectors/';
 
 import * as VComponents from '../../visual-components';
@@ -21,19 +20,18 @@ const VComponentList = Object.keys(VComponents).map(vname => ({
   View: VComponents[vname].View,
 }));
 
-class PickerPane extends PureComponent {
+class Widgets extends PureComponent {
   static defaultProps = {
     className: '',
     addComponentToSchema() {},
-    canvasDimension: undefined,
+    sketchDimension: undefined,
     focusComponent: {},
     focusType: null,
-    // activeDocker: null,
   }
   static propTypes = {
     className: PropTypes.string,
     addComponentToSchema: PropTypes.func,
-    canvasDimension: PropTypes.shape({
+    sketchDimension: PropTypes.shape({
       top: PropTypes.number,
       right: PropTypes.number,
       bottom: PropTypes.number,
@@ -45,13 +43,9 @@ class PickerPane extends PureComponent {
       index: PropTypes.number,
     }),
     focusType: PropTypes.oneOf(['INSERT', 'APPEND']),
-    // activeDocker: PropTypes.shape({
-    //   id: PropTypes.string,
-    //   index: PropTypes.number,
-    // }),
   }
   shouldComponentUpdate(nextProps) {
-    const pickPropsList = ['canvasDimension'];
+    const pickPropsList = ['sketchDimension'];
     return !isEqual(pick(nextProps, pickPropsList), pick(this.props, pickPropsList));
   }
   handleAddComponent = (componentData) => {
@@ -84,28 +78,21 @@ class PickerPane extends PureComponent {
       });
     });
 
-    // if (activeDocker) {
-    //   assign(info, {
-    //     pid: activeDocker.id,
-    //     index: activeDocker.index,
-    //   });
-    // }
-
     addComponentToSchema(assign(componentData, info, {
       id: uniqueId(componentData.componentName),
       componentProps: initialProps,
     }));
   }
-  renderComponentPicker = ({ name, prototype }) => {
-    const { canvasDimension } = this.props;
+  renderPicker = ({ name, prototype }) => {
+    const { sketchDimension } = this.props;
     const pickerProps = {
       name,
       prototype,
       key: name,
-      canvasDimension,
+      sketchDimension,
       addComponent: this.handleAddComponent,
     };
-    return <ComponentPicker {...pickerProps} />;
+    return <Picker {...pickerProps} />;
   }
   render() {
     const { className } = this.props;
@@ -114,21 +101,20 @@ class PickerPane extends PureComponent {
     };
     return (
       <div {...props}>
-        <ComponentStore>
+        <Collector>
           {
-            VComponentList.map(this.renderComponentPicker)
+            VComponentList.map(this.renderPicker)
           }
-        </ComponentStore>
+        </Collector>
       </div>
     );
   }
 }
 
 const mapStateToProps = state => ({
-  canvasDimension: state.canvasDimension,
+  sketchDimension: state.sketchDimension,
   focusComponent: selectFocusComponent(state),
-  focusType: state.canvasStatus.focusType,
-  // activeDocker: state.canvasStatus.activeDocker,
+  focusType: state.sketchStatus.focusType,
 });
 const mapDispatchToProps = dispatch => ({
   addComponentToSchema(payload) {
@@ -139,4 +125,4 @@ const mapDispatchToProps = dispatch => ({
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(PickerPane);
+)(Widgets);

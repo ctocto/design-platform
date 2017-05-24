@@ -5,8 +5,8 @@ import get from 'lodash/get';
 import { appSchema } from '../schema/';
 
 const getNormalizedSchema = state => state.schema;
-const getActiveComponent = state => state.canvasStatus.activeComponent;
-const getFocusComponent = state => state.canvasStatus.focusComponent;
+const getActiveComponent = state => state.sketchStatus.activeComponent;
+const getFocusComponent = state => state.sketchStatus.focusComponent;
 
 export const selectSchema = createSelector(
   [getNormalizedSchema],

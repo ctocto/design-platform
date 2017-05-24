@@ -3,7 +3,7 @@
 ## Global State
 ```js
 {
-  canvasDimension: {
+  sketchDimension: {
     width,
     height,
     left,

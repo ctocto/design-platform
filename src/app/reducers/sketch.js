@@ -1,15 +1,15 @@
 import assign from 'lodash/assign';
 import {
-  CANVAS_DIMENSION_UPDATE,
-  CANVAS_SET_ACTIVE_COMPONENT,
-  CANVAS_SET_FOCUS_COMPONENT,
-  CANVAS_START_DRAGGING,
-  CANVAS_STOP_DRAGGING,
+  SKETCH_DIMENSION_UPDATE,
+  SKETCH_SET_ACTIVE_COMPONENT,
+  SKETCH_SET_FOCUS_COMPONENT,
+  SKETCH_START_DRAGGING,
+  SKETCH_STOP_DRAGGING,
 } from '../actions/actionTypes';
 
 function dimension(state = {}, action) {
   switch (action.type) {
-    case CANVAS_DIMENSION_UPDATE:
+    case SKETCH_DIMENSION_UPDATE:
       return assign({}, action.payload);
     default:
       return state;
@@ -24,23 +24,23 @@ function status(state = {
 }, action) {
   const { payload } = action;
   switch (action.type) {
-    case CANVAS_SET_ACTIVE_COMPONENT:
+    case SKETCH_SET_ACTIVE_COMPONENT:
       return {
         ...state,
         activeComponent: payload,
       };
-    case CANVAS_SET_FOCUS_COMPONENT:
+    case SKETCH_SET_FOCUS_COMPONENT:
       return {
         ...state,
         focusComponent: payload.component,
         focusType: payload.type,
       };
-    case CANVAS_START_DRAGGING:
+    case SKETCH_START_DRAGGING:
       return {
         ...state,
         dragging: true,
       };
-    case CANVAS_STOP_DRAGGING:
+    case SKETCH_STOP_DRAGGING:
       return {
         ...state,
         dragging: false,

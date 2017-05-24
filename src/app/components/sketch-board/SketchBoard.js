@@ -8,9 +8,9 @@ import ControlLayer from './ControlLayer';
 import * as VComponents from '../../../visual-components';
 import Store from '../../store/';
 
-import styles from './Canvas.css';
+import styles from './SketchBoard.css';
 
-class Canvas extends Component {
+export default class SketchBoard extends Component {
   static defaultProps = {
     width: 600,
     height: 400,
@@ -159,8 +159,8 @@ class Canvas extends Component {
   }
   render() {
     const { width, height } = this.props;
-    const canvasProps = {
-      className: classnames(styles.canvas),
+    const props = {
+      className: classnames(styles.SketchBoard),
       style: {
         width,
         height,
@@ -169,12 +169,9 @@ class Canvas extends Component {
       onMouseOver: this.handleMouseOver,
     };
     return (
-      <div {...canvasProps}>
+      <div {...props}>
         {this.renderSchema()}
       </div>
     );
   }
 }
-
-export default Canvas;
-
