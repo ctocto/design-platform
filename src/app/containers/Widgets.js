@@ -24,29 +24,20 @@ class Widgets extends PureComponent {
   static defaultProps = {
     className: '',
     addComponentToSchema() {},
-    sketchDimension: undefined,
     focusComponent: {},
     focusType: null,
+    mouseInSketch: false,
   }
   static propTypes = {
     className: PropTypes.string,
     addComponentToSchema: PropTypes.func,
-    sketchDimension: PropTypes.shape({
-      top: PropTypes.number,
-      right: PropTypes.number,
-      bottom: PropTypes.number,
-      left: PropTypes.number,
-    }),
     focusComponent: PropTypes.shape({
       id: PropTypes.string,
       pid: PropTypes.string,
       index: PropTypes.number,
     }),
     focusType: PropTypes.oneOf(['INSERT', 'APPEND']),
-  }
-  shouldComponentUpdate(nextProps) {
-    const pickPropsList = ['sketchDimension'];
-    return !isEqual(pick(nextProps, pickPropsList), pick(this.props, pickPropsList));
+    mouseInSketch: PropTypes.bool,
   }
   handleAddComponent = (componentData) => {
     const { addComponentToSchema, focusComponent, focusType } = this.props;
@@ -84,13 +75,13 @@ class Widgets extends PureComponent {
     }));
   }
   renderPicker = ({ name, prototype }) => {
-    const { sketchDimension } = this.props;
+    const { mouseInSketch } = this.props;
     const pickerProps = {
       name,
       prototype,
       key: name,
-      sketchDimension,
       addComponent: this.handleAddComponent,
+      inSketch: mouseInSketch,
     };
     return <Picker {...pickerProps} />;
   }
@@ -112,9 +103,9 @@ class Widgets extends PureComponent {
 }
 
 const mapStateToProps = state => ({
-  sketchDimension: state.sketchDimension,
   focusComponent: selectFocusComponent(state),
-  focusType: state.sketchStatus.focusType,
+  focusType: state.sketch.focusType,
+  mouseInSketch: state.sketch.mouseIn,
 });
 const mapDispatchToProps = dispatch => ({
   addComponentToSchema(payload) {

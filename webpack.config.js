@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const postcssNextPlugin = require('postcss-cssnext');
 
@@ -24,6 +25,7 @@ const babelOptions = {
     'react',
   ],
   plugins: [
+    'react-hot-loader/babel',
     [
       'transform-object-rest-spread',
       {
@@ -31,6 +33,7 @@ const babelOptions = {
       },
     ],
     'transform-class-properties',
+    'transform-es2015-classes',
     'transform-export-extensions',
   ],
 };
@@ -38,7 +41,12 @@ const babelOptions = {
 module.exports = {
   context,
   entry: {
-    index: './index.js',
+    index: [
+      'react-hot-loader/patch',
+      // 'webpack-dev-server/client?http://localhost:8080',
+      // 'webpack/hot/only-dev-server',
+      './index.js',
+    ],
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -99,8 +107,9 @@ module.exports = {
     react: 'React',
     'react-dom': 'ReactDOM',
   },
-  devtool: 'cheap-source-map',
+  devtool: 'eval',
   plugins: [
+    new webpack.HotModuleReplacementPlugin(),
     new HtmlWebpackPlugin({
       filename: 'index.html',
       template: './index.html',
@@ -109,5 +118,6 @@ module.exports = {
   ],
   devServer: {
     contentBase: path.join(__dirname, 'node_modules'),
+    hot: true,
   },
 };

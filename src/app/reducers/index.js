@@ -1,11 +1,12 @@
 import { combineReducers } from 'redux';
-import { dimension, status } from './sketch';
+import sketch from './sketch';
 import { schema } from './schema';
+import device from './device';
 
 const appReducer = combineReducers({
-  sketchDimension: dimension,
-  sketchStatus: status,
+  sketch,
   schema,
+  device,
 });
 
 export default appReducer;

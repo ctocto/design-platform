@@ -2,19 +2,18 @@ import { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-import { selectActiveComponent, selectAllComponents } from '../selectors/';
+import { selectActiveComponent } from '../selectors/';
 import Configer from '../components/configer/';
-import Store from '../store/';
+import { schemaAction } from '../actions/';
 
 class Configs extends PureComponent {
   static defaultProps = {
     className: '',
-    components: {},
     activeComponent: undefined,
+    updateComponentProps() {},
   }
   static propTypes = {
     className: PropTypes.string,
-    components: PropTypes.object,
     activeComponent: PropTypes.shape({
       id: PropTypes.string,
       index: PropTypes.number,
@@ -22,6 +21,7 @@ class Configs extends PureComponent {
       component: PropTypes.string,
       props: PropTypes.object,
     }),
+    updateComponentProps: PropTypes.func,
   }
   static contextTypes = {
     store: PropTypes.object,
@@ -30,32 +30,12 @@ class Configs extends PureComponent {
     super(props);
     this.stores = {};
   }
-  componentDidMount() {
-    this.updateStore();
-  }
-  componentDidUpdate() {
-    this.updateStore();
-  }
-  updateStore() {
-    const { components } = this.props;
-    const newStores = {};
-    const dispatch = this.context.store.dispatch;
-    Object.keys(components).forEach((id) => {
-      if (!this.stores[id]) {
-        newStores[id] = new Store(components[id], dispatch);
-      } else {
-        newStores[id] = this.stores[id];
-      }
-    });
-    this.stores = newStores;
-  }
   renderConfigers() {
-    const { activeComponent } = this.props;
+    const { activeComponent, updateComponentProps } = this.props;
     return (
       <Configer
-        componentId={activeComponent.id}
-        componentName={activeComponent.component}
-        store={this.stores[activeComponent.id]}
+        component={activeComponent}
+        setProp={updateComponentProps}
       />
     );
   }
@@ -73,12 +53,11 @@ class Configs extends PureComponent {
 }
 
 const mapStateToProps = state => ({
-  components: selectAllComponents(state),
   activeComponent: selectActiveComponent(state),
 });
 
 const mapDispatchToProps = dispatch => ({
-
+  updateComponentProps: payload => dispatch(schemaAction.updateComponentProps(payload)),
 });
 
 export default connect(

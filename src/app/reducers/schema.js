@@ -1,5 +1,7 @@
 import assign from 'lodash/assign';
+import find from 'lodash/find';
 import { normalize } from 'normalizr';
+import Immutable from 'seamless-immutable';
 import {
   SCHEMA_ADD_COMPONENT,
   SCHEMA_REMOVE_COMPONENT,
@@ -8,15 +10,13 @@ import {
 } from '../actions/actionTypes';
 import { appSchema } from '../schema/';
 
-const initialState = normalize([], appSchema);
+const initialState = Immutable(normalize([], appSchema));
 
 const insert = (array, index, value) => {
   if (index === -1) {
-    array.splice(array.length, 0, value);
-  } else {
-    array.splice(index, 0, value);
+    return array.concat([value]);
   }
-  return array;
+  return array.slice(0, index).concat([value]).concat(array.slice(index));
 };
 
 const findComponent = (id, result, components) => {
@@ -48,9 +48,8 @@ const findComponent = (id, result, components) => {
 
 function schema(state = initialState, action) {
   const { payload } = action;
-  const components = { ...state.entities.components };
-  let entities;
-  let result;
+  const { components } = state.entities;
+  let newState;
   switch (action.type) {
     case SCHEMA_ADD_COMPONENT:
       const newComp = {
@@ -62,53 +61,45 @@ function schema(state = initialState, action) {
         },
       };
       if (payload.pid && components[payload.pid]) {
-        const pc = components[payload.pid];
-        result = [...state.result];
-        entities = {
-          components: assign(components, {
-            [payload.pid]: {
-              ...pc,
-              children: insert([...pc.children], payload.index, payload.id),
-            },
-            ...newComp,
-          }),
-        };
+        newState = state.updateIn(
+          ['entities', 'components', payload.pid, 'children'],
+          ids => insert(ids, payload.index, payload.id),
+        ).merge({
+          entities: {
+            components: newComp,
+          },
+        }, { deep: true });
       } else {
-        result = insert([...state.result], payload.index, payload.id);
-        entities = {
-          components: assign(components, newComp),
-        };
+        newState = state.update(
+          'result',
+          ids => insert(ids, payload.index, payload.id),
+        ).merge({
+          entities: {
+            components: newComp,
+          },
+        }, { deep: true });
       }
-      return {
-        entities,
-        result,
-      };
+      return newState;
     case SCHEMA_REMOVE_COMPONENT:
       const removeId = payload;
-      result = [...state.result];
-      if (result.includes(removeId)) {
+      newState = state;
+      if (newState.result.includes(removeId)) {
         // if the component is in root
-        result = result.filter(id => id !== removeId);
+        newState = newState.update('result', ids => ids.filter(id => id !== removeId));
       } else {
         // find the parent component
-        Object.keys(components).forEach((cid) => {
-          if (removeId !== cid) {
-            if (components[cid].children.includes(removeId)) {
-              components[cid].children = components[cid].children.filter(id => id !== removeId);
-            }
-          }
-        });
+        const parentComponent = find(newState.entities.components, o => o.children.includes(removeId));
+        if (parentComponent) {
+          newState = newState.updateIn(
+            ['entities', 'components', parentComponent.id],
+            comps => comps.update('children', ids => ids.filter(id => id !== removeId)),
+          );
+        }
       }
       // TODO:
       //  if the component has children
       //  need warn the user
-      delete components[removeId];
-      return {
-        result,
-        entities: {
-          components,
-        },
-      };
+      return newState.updateIn(['entities', 'components'], comps => comps.without(removeId));
     case SCHEMA_UPDATE_COMPONENT:
       const { activeComponent, focusComponent, focusType } = payload;
       // 0. if has no active component
@@ -117,57 +108,69 @@ function schema(state = initialState, action) {
       if (!activeComponent || focusComponent === activeComponent) {
         return state;
       }
-      result = [...state.result];
       // 1. calculate the active component data
-      const activeComponentMeta = findComponent(activeComponent, result, components);
+      const activeComponentMeta = findComponent(activeComponent, state.result, state.entities.components);
       // 2. shift out active component from the origin container
       if (!activeComponentMeta.pid) {
-        result.splice(activeComponentMeta.index, 1);
+        newState = state.update(
+          'result',
+          ids => ids.slice(0, activeComponentMeta.index)
+            .concat(ids.slice(activeComponentMeta.index + 1)),
+        );
       } else {
-        components[activeComponentMeta.pid].children.splice(activeComponentMeta.index, 1);
+        newState = state.updateIn(
+          ['entities', 'components', activeComponentMeta.pid, 'children'],
+          ids => ids.slice(0, activeComponentMeta.index)
+            .concat(ids.slice(activeComponentMeta.index + 1)),
+        );
       }
 
       // 3. if the focus component is null
       //    then move the active component to the end of result
       if (!focusComponent) {
-        result.push(activeComponent);
+        newState = newState.update('result', ids => ids.concat(activeComponent));
       } else {
         // 3. if focusType is 'INSERT'
         //    insert the active component to the focus component's children
         //    or
         //    insert active component after the focus component
         if (focusType === 'INSERT') {
-          components[focusComponent].children.push(activeComponent);
+          newState = newState.updateIn(
+            ['entities', 'components', focusComponent, 'children'],
+            ids => ids.concat(activeComponent),
+          );
         } else {
           // calculate the focus component data
-          const focusComponentMeta = findComponent(focusComponent, result, components);
+          const focusComponentMeta = findComponent(focusComponent, state.result, components);
           if (!focusComponentMeta.pid) {
-            result.splice(focusComponentMeta.index + 1, 0, activeComponentMeta.id);
+            newState = newState.update(
+              'result',
+              ids => ids.slice(0, focusComponentMeta.index + 1)
+                .concat([activeComponentMeta.id])
+                .concat(ids.slice(focusComponentMeta.index + 1)),
+            );
           } else {
-            components[focusComponentMeta.pid].children.splice(
-              focusComponentMeta.index + 1,
-              0,
-              activeComponentMeta.id,
+            newState = newState.updateIn(
+              ['entities', 'components', focusComponentMeta.pid, 'children'],
+              ids => ids.slice(0, focusComponentMeta.index + 1)
+                .concat([activeComponentMeta.id])
+                .concat(ids.slice(focusComponentMeta.index + 1)),
             );
           }
         }
       }
-      return {
-        result,
-        entities: {
-          components,
-        },
-      };
+      return newState;
     case SCHEMA_UPDATE_PROPS:
       const { id, nextProps } = payload;
-      result = [...state.result];
-      assign(components[id].props, nextProps);
-      return {
-        result,
+      return state.merge({
         entities: {
-          components,
+          components: {
+            [id]: {
+              props: nextProps,
+            },
+          },
         },
-      };
+      }, { deep: true });
     default:
       return state;
   }

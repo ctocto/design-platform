@@ -3,10 +3,12 @@ import { denormalize } from 'normalizr';
 import assign from 'lodash/assign';
 import get from 'lodash/get';
 import { appSchema } from '../schema/';
+import { SCREEN_RESOULTION_DEFINE } from '../constants';
 
-const getNormalizedSchema = state => state.schema;
-const getActiveComponent = state => state.sketchStatus.activeComponent;
-const getFocusComponent = state => state.sketchStatus.focusComponent;
+const getNormalizedSchema = state => state.schema.asMutable({ deep: true });
+const getActiveComponent = state => state.sketch.activeComponent;
+const getFocusComponent = state => state.sketch.focusComponent;
+const getDeviceName = state => state.device.name;
 
 export const selectSchema = createSelector(
   [getNormalizedSchema],
@@ -80,4 +82,9 @@ export const selectFocusComponent = createSelector(
     }
     return res;
   },
+);
+
+export const selectDeviceResolution = createSelector(
+  [getDeviceName],
+  name => SCREEN_RESOULTION_DEFINE[name],
 );

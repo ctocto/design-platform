@@ -3,38 +3,50 @@ import PropTypes from 'prop-types';
 import get from 'lodash/get';
 
 import styles from './Configer';
-import Store from '../../store/';
 import * as VComponents from '../../../visual-components/';
 
 export default class Configer extends Component {
   static defaultProps = {
-    componentId: undefined,
-    componentName: undefined,
-    store: undefined,
+    component: undefined,
+    setProp() {},
   }
   static propTypes = {
-    componentId: PropTypes.string,
-    componentName: PropTypes.string,
-    store: PropTypes.instanceOf(Store),
+    component: PropTypes.shape({
+      id: PropTypes.string,
+      index: PropTypes.number,
+      pid: PropTypes.string,
+      component: PropTypes.string,
+      props: PropTypes.object,
+    }),
+    setProp: PropTypes.func,
   }
   handleChange(name, value) {
-    this.props.store.setProp(name, value);
+    const { component, setProp } = this.props;
+    setProp({
+      id: component.id,
+      nextProps: {
+        [name]: value,
+      },
+    });
   }
-  renderConfigBlock = config => (
-    <div key={config.name}>
-      <h3>{config.title}</h3>
-      {
-        cloneElement(config.setter, {
-          onChange: this.handleChange.bind(this, config.name),
-          value: this.props.store.getProp(config.name),
-        })
-      }
-    </div>
-  )
+  renderConfigBlock = (config) => {
+    const { component } = this.props;
+    return (
+      <div key={config.name}>
+        <h3>{config.title}</h3>
+        {
+          cloneElement(config.setter, {
+            onChange: this.handleChange.bind(this, config.name),
+            value: component.props[config.name],
+          })
+        }
+      </div>
+    );
+  }
   render() {
-    const { componentName } = this.props;
+    const { component } = this.props;
     const configers = get(VComponents, [
-      componentName,
+      component.component,
       'prototype',
       'configers',
     ], []);

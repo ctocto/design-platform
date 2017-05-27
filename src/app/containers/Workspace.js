@@ -3,14 +3,13 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { batchActions } from 'redux-batched-actions';
 
-import { sketchAction, schemaAction } from '../actions/';
-import { selectSchema } from '../selectors/';
+import { sketchAction, schemaAction, deviceAction } from '../actions/';
+import { selectSchema, selectDeviceResolution } from '../selectors/';
 import SketchBoard from '../components/sketch-board/';
 
 class Workspace extends PureComponent {
   static defaultProps = {
     className: '',
-    onDimensionUpdate() {},
     setFocusComponent() {},
     setActiveComponent() {},
     schemaData: [],
@@ -21,10 +20,12 @@ class Workspace extends PureComponent {
     stopDraggingAndUpdateSchema() {},
     removeComponent() {},
     dragging: false,
+    screenSize: undefined,
+    setMouseIn() {},
+    setMouseOut() {},
   }
   static propTypes = {
     className: PropTypes.string,
-    onDimensionUpdate: PropTypes.func,
     setFocusComponent: PropTypes.func,
     setActiveComponent: PropTypes.func,
     schemaData: PropTypes.array,
@@ -35,6 +36,9 @@ class Workspace extends PureComponent {
     stopDraggingAndUpdateSchema: PropTypes.func,
     removeComponent: PropTypes.func,
     dragging: PropTypes.bool,
+    screenSize: PropTypes.arrayOf(PropTypes.number),
+    setMouseIn: PropTypes.func,
+    setMouseOut: PropTypes.func,
   }
   handleStopDragging = () => {
     const {
@@ -48,7 +52,6 @@ class Workspace extends PureComponent {
   render() {
     const {
       className,
-      onDimensionUpdate,
       setFocusComponent,
       setActiveComponent,
       schemaData,
@@ -57,13 +60,15 @@ class Workspace extends PureComponent {
       removeComponent,
       startDragging,
       dragging,
+      screenSize,
+      setMouseIn,
+      setMouseOut,
     } = this.props;
     const props = {
       className,
     };
     const sketchBoardProps = {
       schemaData,
-      onDimensionUpdate,
       setFocus: setFocusComponent,
       setActiveComponent,
       activeComponent,
@@ -72,6 +77,9 @@ class Workspace extends PureComponent {
       startDragging,
       stopDragging: this.handleStopDragging,
       dragging,
+      screenSize,
+      setMouseIn,
+      setMouseOut,
     };
     return (
       <div {...props}><SketchBoard {...sketchBoardProps} /></div>
@@ -81,16 +89,14 @@ class Workspace extends PureComponent {
 
 const mapStateToProps = state => ({
   schemaData: selectSchema(state),
-  activeComponent: state.sketchStatus.activeComponent,
-  focusComponent: state.sketchStatus.focusComponent,
-  focusType: state.sketchStatus.focusType,
-  dragging: state.sketchStatus.dragging,
+  activeComponent: state.sketch.activeComponent,
+  focusComponent: state.sketch.focusComponent,
+  focusType: state.sketch.focusType,
+  dragging: state.sketch.dragging,
+  screenSize: selectDeviceResolution(state),
 });
 
 const mapDispatchToProps = dispatch => ({
-  onDimensionUpdate: (dimension) => {
-    dispatch(sketchAction.updateSketchDimension(dimension));
-  },
   setFocusComponent: (id, type) => {
     dispatch(sketchAction.setFocusComponent({
       component: id,
@@ -118,6 +124,12 @@ const mapDispatchToProps = dispatch => ({
       sketchAction.setActiveComponent(null),
       schemaAction.removeComponent(id),
     ]));
+  },
+  setMouseIn: () => {
+    dispatch(sketchAction.setMouseIn());
+  },
+  setMouseOut: () => {
+    dispatch(sketchAction.setMouseOut());
   },
 });
 

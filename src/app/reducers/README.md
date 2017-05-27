@@ -3,16 +3,24 @@
 ## Global State
 ```js
 {
-  sketchDimension: {
-    width,
-    height,
-    left,
-    top,
-    right,
-    bottom,
+  sketch: {
+    activeComponent,
+    dragging,
+    focusComponent,
+    focusType,
+    mouseIn,
   },
-  currentPicker,
-  schema,
+  device: {
+    name,
+  },
+  schema: {
+    result:
+    entities: {
+      components: {
+        
+      },
+    }
+  },
 }
 ```
 

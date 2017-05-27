@@ -9,9 +9,17 @@ html, body, :global(#App) {
 
 .app {
   display: flex;
+  flex-wrap: wrap;
   width: 100%;
   height: 100%;
+  align-content: flex-start;
 }
+
+.topBar {
+  flex: 1 0 100%;
+  height: 40px;
+}
+
 .workspace {
   display: flex;
   order: 1;

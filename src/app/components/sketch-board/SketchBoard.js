@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import Draggable from 'react-draggable';
 import findKey from 'lodash/findKey';
+import isEqual from 'lodash/isEqual';
 
 import ControlLayer from './ControlLayer';
 import * as VComponents from '../../../visual-components';
@@ -12,9 +13,6 @@ import styles from './SketchBoard.css';
 
 export default class SketchBoard extends Component {
   static defaultProps = {
-    width: 600,
-    height: 400,
-    onDimensionUpdate() {},
     setFocus() {},
     schemaData: [],
     activeComponent: null,
@@ -24,11 +22,11 @@ export default class SketchBoard extends Component {
     stopDragging() {},
     removeComponent() {},
     dragging: false,
+    screenSize: undefined,
+    setMouseIn() {},
+    setMouseOut() {},
   }
   static propTypes = {
-    width: PropTypes.number,
-    height: PropTypes.number,
-    onDimensionUpdate: PropTypes.func,
     setFocus: PropTypes.func,
     schemaData: PropTypes.array,
     activeComponent: PropTypes.string,
@@ -38,28 +36,12 @@ export default class SketchBoard extends Component {
     stopDragging: PropTypes.func,
     removeComponent: PropTypes.func,
     dragging: PropTypes.bool,
+    screenSize: PropTypes.arrayOf(PropTypes.number),
+    setMouseIn: PropTypes.func,
+    setMouseOut: PropTypes.func,
   }
   componentRefs = {}
   dockerRefs = {}
-  componentDidMount() {
-    this.handleUpdate();
-  }
-  componentDidUpdate(prevProps) {
-    if (this.props.width !== prevProps.width || this.props.height !== prevProps.height) {
-      this.handleUpdate();
-    }
-  }
-  handleUpdate() {
-    const rect = this.el.getBoundingClientRect();
-    this.props.onDimensionUpdate({
-      width: rect.width,
-      height: rect.height,
-      left: rect.left,
-      top: rect.top,
-      right: rect.right,
-      bottom: rect.bottom,
-    });
-  }
   handleMouseOver = (e) => {
     const { setFocus } = this.props;
     let element = e.target;
@@ -81,6 +63,12 @@ export default class SketchBoard extends Component {
     } else {
       setFocus(matchComponentId, 'APPEND');
     }
+  }
+  handleMouseEnter = () => {
+    this.props.setMouseIn();
+  }
+  handleMouseLeave = () => {
+    this.props.setMouseOut();
   }
   handleControlClick(id, type) {
     switch (type) {
@@ -159,15 +147,17 @@ export default class SketchBoard extends Component {
     return this.renderComponents(schemaData);
   }
   render() {
-    const { width, height } = this.props;
+    const { screenSize } = this.props;
     const props = {
       className: classnames(styles.SketchBoard),
       style: {
-        width,
-        height,
+        width: screenSize[0],
+        height: screenSize[1],
       },
       ref: node => (this.el = node),
       onMouseOver: this.handleMouseOver,
+      onMouseEnter: this.handleMouseEnter,
+      onMouseLeave: this.handleMouseLeave,
     };
     return (
       <div {...props}>
