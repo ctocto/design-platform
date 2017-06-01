@@ -9,3 +9,6 @@
 .Docker__wrapper--active {
   border-color: #6a87ff;
 }
+.Docker__wrapper--active:has(.Docker__wrapper--active) {
+  border-color: #ccc;
+}

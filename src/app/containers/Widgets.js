@@ -6,8 +6,9 @@ import uniqueId from 'lodash/uniqueId';
 import isEqual from 'lodash/isEqual';
 import pick from 'lodash/pick';
 import get from 'lodash/get';
+import { batchActions } from 'redux-batched-actions';
 
-import { schemaAction } from '../actions/';
+import { schemaAction, sketchAction } from '../actions/';
 import Collector from '../components/collector/';
 import Picker from '../components/picker/';
 import { selectFocusComponent } from '../selectors/';
@@ -16,7 +17,7 @@ import * as VComponents from '../../visual-components';
 
 const VComponentList = Object.keys(VComponents).map(vname => ({
   name: vname,
-  prototype: VComponents[vname].prototype,
+  meta: VComponents[vname].prototype.meta,
   View: VComponents[vname].View,
 }));
 
@@ -38,6 +39,12 @@ class Widgets extends PureComponent {
     }),
     focusType: PropTypes.oneOf(['INSERT', 'APPEND']),
     mouseInSketch: PropTypes.bool,
+  }
+  shouldComponentUpdate(nextProps) {
+    return !isEqual(
+      pick(nextProps, ['className', 'focusComponent', 'focusType', 'mouseInSketch']),
+      pick(this.props, ['className', 'focusComponent', 'focusType', 'mouseInSketch']),
+    );
   }
   handleAddComponent = (componentData) => {
     const { addComponentToSchema, focusComponent, focusType } = this.props;
@@ -74,11 +81,11 @@ class Widgets extends PureComponent {
       componentProps: initialProps,
     }));
   }
-  renderPicker = ({ name, prototype }) => {
+  renderPicker = ({ name, meta }) => {
     const { mouseInSketch } = this.props;
     const pickerProps = {
       name,
-      prototype,
+      meta,
       key: name,
       addComponent: this.handleAddComponent,
       inSketch: mouseInSketch,
@@ -109,7 +116,12 @@ const mapStateToProps = state => ({
 });
 const mapDispatchToProps = dispatch => ({
   addComponentToSchema(payload) {
-    dispatch(schemaAction.addComponentToSchema(payload));
+    dispatch(
+      batchActions([
+        schemaAction.addComponentToSchema(payload),
+        sketchAction.setActiveComponent(payload.id),
+      ]),
+    );
   },
 });
 

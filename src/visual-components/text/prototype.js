@@ -1,11 +1,10 @@
-import assign from 'lodash/assign';
+import { createPrototype } from '../../engine/visualEngine';
 import {
   TextSetter,
 } from '../../setters/';
-import { prototype } from '../base/';
 import Icon from './icon.svg';
 
-export default assign({}, prototype, {
+export default createPrototype({
   icon: <Icon width={48} height={48} />,
   name: 'Text',
   configers: [
@@ -14,7 +13,7 @@ export default assign({}, prototype, {
       title: '内容',
       setter: <TextSetter
         multipleLine
-        placeholder={'这里是placeholder'}
+        placeholder={'请输入文本内容'}
       />,
       defaultValue: 'Text Content',
     },

@@ -1,8 +1,11 @@
 import { Component } from 'react';
 import PropTypes from 'prop-types';
+import Select from 'antd/lib/select';
 
 import { SCREEN_RESOULTION_DEFINE } from '../../constants';
 import styles from './DeviceChanger.css';
+
+const { Option } = Select;
 
 
 export default class DeviceChange extends Component {
@@ -14,19 +17,19 @@ export default class DeviceChange extends Component {
     value: PropTypes.string,
     onChange: PropTypes.func,
   }
-  handleChange = (e) => {
-    this.props.onChange(e.target.value);
+  handleChange = (value) => {
+    this.props.onChange(value);
   }
   render() {
     const { value } = this.props;
     return (
-      <select onChange={this.handleChange} value={value}>
+      <Select onChange={this.handleChange} value={value}>
         {
           Object.keys(SCREEN_RESOULTION_DEFINE).map(
-            d => <option key={d}>{d}</option>,
+            d => <Option value={d} key={d}>{d}</Option>,
           )
         }
-      </select>
+      </Select>
     );
   }
 }

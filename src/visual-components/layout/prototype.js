@@ -1,11 +1,10 @@
-import assign from 'lodash/assign';
-import { prototype } from '../base/';
+import { createPrototype } from '../../engine/visualEngine';
 import Icon from './icon.svg';
 import {
   NumberSetter,
 } from '../../setters/';
 
-export default assign({}, prototype, {
+export default createPrototype({
   type: 'container',
   icon: <Icon width={48} height={48} />,
   name: 'Layout',

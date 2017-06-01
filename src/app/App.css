@@ -29,9 +29,9 @@ html, body, :global(#App) {
 }
 .widgets {
   order: 0;
-  flex: 0 0 128px;
+  flex: 0 0 200px;
 }
-.configs {
+.sider {
   order: 2;
-  flex: 0 0 100px;
+  flex: 0 0 200px;
 }

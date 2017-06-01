@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import assign from 'lodash/assign';
+import Input from 'antd/lib/input';
 
 const TextSetter = ({ placeholder, multipleLine, value, onChange }) => {
   const handleChange = (e) => {
@@ -14,8 +15,13 @@ const TextSetter = ({ placeholder, multipleLine, value, onChange }) => {
     assign(props, {
       type: 'text',
     });
+  } else {
+    assign(props, {
+      type: 'textarea',
+      autosize: true,
+    });
   }
-  return (multipleLine ? <textarea {...props} /> : <input {...props} />);
+  return <Input {...props} />;
 };
 TextSetter.defaultProps = {
   placeholder: '',

@@ -1,5 +1,6 @@
+import 'antd/dist/antd.css';
 import Widgets from './containers/Widgets';
-import Configs from './containers/Configs';
+import Sider from './containers/Sider';
 import Workspace from './containers/Workspace';
 import TopBar from './containers/TopBar';
 
@@ -10,7 +11,7 @@ const App = () => (
     <TopBar className={styles.topBar} />
     <Workspace className={styles.workspace} />
     <Widgets className={styles.widgets} />
-    <Configs className={styles.configs} />
+    <Sider className={styles.sider} />
   </div>
 );
 

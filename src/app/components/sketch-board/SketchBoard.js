@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import Draggable from 'react-draggable';
 import findKey from 'lodash/findKey';
-import isEqual from 'lodash/isEqual';
 
 import ControlLayer from './ControlLayer';
 import * as VComponents from '../../../visual-components';
@@ -92,7 +91,7 @@ export default class SketchBoard extends Component {
       const View = VComponents[c.component].PrototypeView;
       const viewProps = {
         id: c.id,
-        ...c.props,
+        // ...c.props,
         store: new Store(c),
         dockerRef: el => (this.dockerRefs[c.id] = el),
       };

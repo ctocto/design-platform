@@ -2,6 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const postcssNextPlugin = require('postcss-cssnext');
+const DashboardPlugin = require('webpack-dashboard/plugin');
 
 const context = path.resolve(__dirname, 'src');
 const babelOptions = {
@@ -19,7 +20,7 @@ const babelOptions = {
         },
         useBuiltIns: true,
         modules: false,
-        debug: true,
+        // debug: true,
       },
     ],
     'react',
@@ -54,7 +55,15 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /antd\.css$/,
+        use: [
+          'style-loader',
+          'css-loader',
+        ],
+      },
+      {
         test: /\.css$/,
+        exclude: /antd\.css$/,
         use: [
           { loader: 'style-loader' },
           {
@@ -101,6 +110,12 @@ module.exports = {
           },
         ],
       },
+      {
+        test: /\.(woff2?|eot|ttf)$/,
+        use: {
+          loader: 'file-loader',
+        },
+      },
     ],
   },
   externals: {
@@ -115,6 +130,7 @@ module.exports = {
       template: './index.html',
       showErrors: true,
     }),
+    new DashboardPlugin(),
   ],
   devServer: {
     contentBase: path.join(__dirname, 'node_modules'),

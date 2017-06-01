@@ -1,6 +1,7 @@
-import { Component, cloneElement } from 'react';
+import { Component } from 'react';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
+import isEqual from 'lodash/isEqual';
 
 import styles from './Configer';
 import * as VComponents from '../../../visual-components/';
@@ -9,6 +10,7 @@ export default class Configer extends Component {
   static defaultProps = {
     component: undefined,
     setProp() {},
+    componentIds: [],
   }
   static propTypes = {
     component: PropTypes.shape({
@@ -19,38 +21,51 @@ export default class Configer extends Component {
       props: PropTypes.object,
     }),
     setProp: PropTypes.func,
+    componentIds: PropTypes.arrayOf(PropTypes.string),
   }
-  handleChange(name, value) {
-    const { component, setProp } = this.props;
-    setProp({
-      id: component.id,
-      nextProps: {
-        [name]: value,
-      },
-    });
-  }
-  renderConfigBlock = (config) => {
-    const { component } = this.props;
+  static renderConfigBlock = (config, props) => {
     return (
-      <div key={config.name}>
+      <div key={`c-${config.name}`}>
         <h3>{config.title}</h3>
-        {
-          cloneElement(config.setter, {
-            onChange: this.handleChange.bind(this, config.name),
-            value: component.props[config.name],
-          })
-        }
+        <config.setter fields={props} />
       </div>
     );
   }
+  componentDidUpdate(prevProps) {
+    const { componentIds } = this.props;
+    if (!isEqual(componentIds, prevProps.componentIds)) {
+      Object.keys(this.prototypeStore).forEach(id => {
+        if (!componentIds.includes(id)) {
+          delete this.prototypeStore[id];
+        }
+      });
+    }
+  }
+  prototypeStore = {}
   render() {
-    const { component } = this.props;
-    const configers = get(VComponents, [
+    const { component, setProp } = this.props;
+    const factory = get(VComponents, [
       component.component,
       'prototype',
-      'configers',
-    ], []);
-    return <div>{configers.map(this.renderConfigBlock)}</div>;
+      'factory',
+    ], () => {});
+    let prototype;
+    if (component && component.id) {
+      if (this.prototypeStore[component.id]) {
+        prototype = this.prototypeStore[component.id];
+      } else {
+        prototype = factory(component.id, setProp);
+        this.prototypeStore[component.id] = prototype;
+      }
+    }
+    if (!prototype) return null;
+    return (
+      <div>
+        {
+          prototype.configers.map(config => Configer.renderConfigBlock(config, component.props))
+        }
+      </div>
+    );
   }
 }
 

@@ -1,28 +1,36 @@
 import PropTypes from 'prop-types';
+import InputNumber from 'antd/lib/input-number';
 
-const NumberSetter = ({ placeholder, value, onChange }) => {
-  const handleChange = (e) => {
-    let v = parseFloat(e.target.value, 10);
-    if (isNaN(v)) {
-      v = 1;
-    }
+const NumberSetter = ({
+  value,
+  onChange,
+  ...otherProps
+}) => {
+  const handleChange = (v) => {
     onChange(v);
   };
   const props = {
     onChange: handleChange,
-    placeholder,
     value,
-    type: 'number',
+    ...otherProps,
   };
-  return <input {...props} />;
+  return <InputNumber {...props} />;
 };
 NumberSetter.defaultProps = {
+  min: -Infinity,
+  max: Infinity,
+  step: 1,
   placeholder: '',
   value: '',
   onChange() {},
 };
 NumberSetter.propTypes = {
-  placeholder: PropTypes.string,
+  min: PropTypes.number,
+  max: PropTypes.number,
+  step: PropTypes.oneOf([
+    PropTypes.string,
+    PropTypes.number,
+  ]),
   value: PropTypes.string,
   onChange: PropTypes.func,
 };

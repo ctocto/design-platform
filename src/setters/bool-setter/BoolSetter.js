@@ -1,15 +1,15 @@
 import PropTypes from 'prop-types';
+import Switch from 'antd/lib/switch';
 
 const BoolSetter = ({ value, onChange }) => {
-  const handleChange = () => {
-    onChange(!value);
+  const handleChange = (checked) => {
+    onChange(checked);
   };
   const props = {
-    type: 'checkbox',
     onChange: handleChange,
     checked: value,
   };
-  return <input {...props} />;
+  return <Switch {...props} />;
 };
 BoolSetter.defaultProps = {
   value: false,
