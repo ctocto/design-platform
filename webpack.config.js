@@ -36,6 +36,7 @@ const babelOptions = {
     'transform-class-properties',
     'transform-es2015-classes',
     'transform-export-extensions',
+    'transform-decorators',
   ],
 };
 

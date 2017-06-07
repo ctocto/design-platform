@@ -10,3 +10,8 @@ export const SCREEN_RESOULTION_DEFINE = {
   'Samsung Galaxy S7': [360, 640],
   'Samsung Galaxy S8': [360, 740],
 };
+
+export const DndTypes = {
+  INSTANCE: Symbol('instance'),
+  CLASS: Symbol('class'),
+};

@@ -1,10 +1,13 @@
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import { PureComponent } from 'react';
-import Draggable from 'react-draggable';
+// import Draggable from 'react-draggable';
 import get from 'lodash/get';
 import pick from 'lodash/pick';
 import { shallowEqual } from 'recompose';
+import { DragSource, DropTarget } from 'react-dnd';
+
+import { DndTypes } from '../../constants';
 import styles from './ControlLayer.css';
 import Drag from './drag.svg';
 import Delete from './delete.svg';
@@ -71,6 +74,9 @@ class ControlLayer extends PureComponent {
       handleDragStop,
       handleControlClick,
       children,
+      connectClassDropTarget,
+      connectInstanceDropTarget,
+      connectDragSource,
       ...otherProps
     } = this.props;
     const props = {
@@ -83,37 +89,72 @@ class ControlLayer extends PureComponent {
       ...otherProps,
     };
     console.warn('render controlLayer');
-    return (
-      <Draggable
-        handle={`.control-handler-${id}`}
-        defaultClassNameDragging={styles['Layer__wrapper--dragging']}
-        onStart={handleDragStart}
-        onStop={handleDragStop}
-      >
-        <div {...props}>
-          <button
-            className={classnames(
-              styles.Layer__controlBtn,
-              styles.Layer__deleteBtn,
-            )}
-            onClick={this.handleClickDeleteBtn}
-          >
-            <Delete width={16} height={16} />
-          </button>
-          <button
-            className={classnames(
-              `control-handler-${id}`,
-              styles.Layer__controlBtn,
-              styles.Layer__dragControl,
-            )}
-          >
-            <Drag width={16} height={16} />
-          </button>
-          {children}
-        </div>
-      </Draggable>
-    );
+    return connectDragSource(
+      connectInstanceDropTarget(
+        connectClassDropTarget(
+          <div {...props}>
+            <button
+              className={classnames(
+                styles.Layer__controlBtn,
+                styles.Layer__deleteBtn,
+              )}
+              onClick={this.handleClickDeleteBtn}
+            >
+              <Delete width={16} height={16} />
+            </button>
+            <button
+              className={classnames(
+                `control-handler-${id}`,
+                styles.Layer__controlBtn,
+                styles.Layer__dragControl,
+              )}
+            >
+              <Drag width={16} height={16} />
+            </button>
+            {children}
+          </div>,
+      )));
   }
 }
 
-export default ControlLayer;
+const classTarget = {
+  drop(props, monitor) {
+    if (!monitor.didDrop()) {
+      return {
+        target: 'instance',
+        id: props.id,
+        status: 'OVER',
+      };
+    }
+  },
+};
+const instanceTarget = {
+
+};
+const instanceSource = {
+  beginDrag(props) {
+    return {
+      id: props.id,
+    };
+  },
+};
+
+export default DropTarget(
+  DndTypes.CLASS,
+  classTarget,
+  connect => ({
+    connectClassDropTarget: connect.dropTarget(),
+  }),
+)(DropTarget(
+  DndTypes.INSTANCE,
+  instanceTarget,
+  connect => ({
+    connectInstanceDropTarget: connect.dropTarget(),
+  }),
+)(DragSource(
+  DndTypes.INSTANCE,
+  instanceSource,
+  connect => ({
+    connectDragSource: connect.dragSource(),
+  }),
+)(ControlLayer)));

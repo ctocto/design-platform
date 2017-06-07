@@ -11,7 +11,7 @@ import { batchActions } from 'redux-batched-actions';
 import { schemaAction, sketchAction } from '../actions/';
 import Collector from '../components/collector/';
 import Picker from '../components/picker/';
-import { selectFocusComponent } from '../selectors/';
+// import { selectFocusComponent } from '../selectors/';
 
 import * as VComponents from '../../visual-components';
 
@@ -25,47 +25,54 @@ class Widgets extends PureComponent {
   static defaultProps = {
     className: '',
     addComponentToSchema() {},
-    focusComponent: {},
-    focusType: null,
-    mouseInSketch: false,
+    // focusType: null,
+    // mouseInSketch: false,
   }
   static propTypes = {
     className: PropTypes.string,
     addComponentToSchema: PropTypes.func,
-    focusComponent: PropTypes.shape({
-      id: PropTypes.string,
-      pid: PropTypes.string,
-      index: PropTypes.number,
-    }),
-    focusType: PropTypes.oneOf(['INSERT', 'APPEND']),
-    mouseInSketch: PropTypes.bool,
+    // focusType: PropTypes.oneOf(['INSERT', 'APPEND']),
+    // mouseInSketch: PropTypes.bool,
   }
   shouldComponentUpdate(nextProps) {
     return !isEqual(
-      pick(nextProps, ['className', 'focusComponent', 'focusType', 'mouseInSketch']),
-      pick(this.props, ['className', 'focusComponent', 'focusType', 'mouseInSketch']),
+      pick(nextProps, ['className']),
+      pick(this.props, ['className']),
     );
   }
-  handleAddComponent = (componentData) => {
-    const { addComponentToSchema, focusComponent, focusType } = this.props;
+  handleAddComponent = ({ componentName, target, id, status }) => {
+    
+    const { addComponentToSchema } = this.props;
     const info = {
       pid: null,
-      index: -1,
+      // index: -1,
+      componentName,
     };
-    if (focusComponent.id) {
-      if (focusType === 'INSERT') {
+    if (target === 'root') {
+      // nothing
+    } else {
+      if (status === 'OVER') {
         assign(info, {
-          pid: focusComponent.id,
+
         });
-      } else {
-        assign(info, {
-          pid: focusComponent.pid,
-          index: focusComponent.index + 1,
-        });
+      } else if (status === 'INSIDE') {
+
       }
+      // if (focusComponent.id) {
+      //   if (focusType === 'INSERT') {
+      //     assign(info, {
+      //       pid: focusComponent.id,
+      //     });
+      //   } else {
+      //     assign(info, {
+      //       pid: focusComponent.pid,
+      //       index: focusComponent.index + 1,
+      //     });
+      //   }
+      // }
     }
     const configers = get(VComponents, [
-      componentData.componentName,
+      componentName,
       'prototype',
       'configers',
     ], []);
@@ -76,19 +83,18 @@ class Widgets extends PureComponent {
       });
     });
 
-    addComponentToSchema(assign(componentData, info, {
-      id: uniqueId(componentData.componentName),
+    addComponentToSchema(assign(info, {
+      id: uniqueId(componentName),
       componentProps: initialProps,
     }));
   }
   renderPicker = ({ name, meta }) => {
-    const { mouseInSketch } = this.props;
+    // const { mouseInSketch } = this.props;
     const pickerProps = {
       name,
       meta,
       key: name,
       addComponent: this.handleAddComponent,
-      inSketch: mouseInSketch,
     };
     return <Picker {...pickerProps} />;
   }
@@ -110,9 +116,9 @@ class Widgets extends PureComponent {
 }
 
 const mapStateToProps = state => ({
-  focusComponent: selectFocusComponent(state),
-  focusType: state.sketch.focusType,
-  mouseInSketch: state.sketch.mouseIn,
+  // focusComponent: selectFocusComponent(state),
+  // focusType: state.sketch.focusType,
+  // mouseInSketch: state.sketch.mouseIn,
 });
 const mapDispatchToProps = dispatch => ({
   addComponentToSchema(payload) {

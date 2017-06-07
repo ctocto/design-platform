@@ -9,6 +9,7 @@
 - [redux-batched-actions](https://github.com/tshelburne/redux-batched-actions)
 - [seamless-immutable](https://github.com/rtfeldman/seamless-immutable)
 - [recompose](https://github.com/acdlite/recompose)
+- [react-dnd](https://github.com/react-dnd/react-dnd)
 
 ## actions
 

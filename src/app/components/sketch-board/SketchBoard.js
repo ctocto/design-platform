@@ -2,21 +2,23 @@ import { Component } from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import { withContext } from 'recompose';
+import { DropTarget } from 'react-dnd';
 
 import ControlLayer from './ControlLayer';
 import * as VComponents from '../../../visual-components';
 import Store from '../../store/';
+import { DndTypes } from '../../constants';
 
 import styles from './SketchBoard.css';
 
-export default class SketchBoard extends Component {
+class SketchBoard extends Component {
   static defaultProps = {
     setFocus() {},
     schemaData: [],
     activeComponent: null,
     focusComponent: null,
     setActiveComponent() {},
-    stopDrag() {},
+    // stopDrag() {},
     removeComponent() {},
     screenSize: undefined,
     setMouseIn() {},
@@ -28,7 +30,7 @@ export default class SketchBoard extends Component {
     activeComponent: PropTypes.string,
     focusComponent: PropTypes.string,
     setActiveComponent: PropTypes.func,
-    stopDrag: PropTypes.func,
+    // stopDrag: PropTypes.func,
     removeComponent: PropTypes.func,
     screenSize: PropTypes.arrayOf(PropTypes.number),
     setMouseIn: PropTypes.func,
@@ -82,7 +84,7 @@ export default class SketchBoard extends Component {
       activeComponent,
       focusComponent,
       setActiveComponent,
-      stopDrag,
+      // stopDrag,
     } = this.props;
     return components.map((c) => {
       const View = VComponents[c.component].PrototypeView;
@@ -110,9 +112,9 @@ export default class SketchBoard extends Component {
             setActiveComponent(c.id);
           }
         },
-        handleDragStop() {
-          stopDrag();
-        },
+        // handleDragStop() {
+        //   stopDrag();
+        // },
         handleControlClick: this.handleControlClick.bind(this, c.id),
       };
       const EnhanceView = withContext(
@@ -139,7 +141,7 @@ export default class SketchBoard extends Component {
     return this.renderComponents(schemaData);
   }
   render() {
-    const { screenSize } = this.props;
+    const { screenSize, connectDropTarget } = this.props;
     const props = {
       className: classnames(styles.SketchBoard),
       style: {
@@ -151,10 +153,27 @@ export default class SketchBoard extends Component {
       onMouseEnter: this.handleMouseEnter,
       onMouseLeave: this.handleMouseLeave,
     };
-    return (
+    console.log(this.props);
+    return connectDropTarget(
       <div {...props}>
         {this.renderSchema()}
       </div>
     );
   }
 }
+
+const sketchTarget = {
+  drop(props, monitor) {
+    if (!monitor.didDrop()) {
+      return {
+        target: 'root',
+      };
+    }
+  },
+};
+
+const collect = (connect, monitor) => ({
+  connectDropTarget: connect.dropTarget(),
+});
+
+export default DropTarget(DndTypes.CLASS, sketchTarget, collect)(SketchBoard);
