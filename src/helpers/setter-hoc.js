@@ -1,12 +1,13 @@
 import { PureComponent, cloneElement } from 'react';
+import hoistNonReactStatic from 'hoist-non-react-statics';
 
 const getDisplayName = c => c.displayName || c.name || 'Component';
 
-export default function hocSetter(SetterComponent, item) {
+export default function setterProvider(SetterComponent, item) {
   const onChange = (value) => {
     this.value = value;
   };
-  return class SetterWapper extends PureComponent {
+  class SetterWapper extends PureComponent {
     static displayName = `Setter(${getDisplayName(SetterComponent)})`;
     render() {
       const { fields } = this.props;
@@ -21,5 +22,6 @@ export default function hocSetter(SetterComponent, item) {
       }
       return cloneElement(SetterComponent, props);
     }
-  };
+  }
+  return hoistNonReactStatic(SetterWapper, SetterComponent);
 }

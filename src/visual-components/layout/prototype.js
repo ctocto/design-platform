@@ -13,7 +13,7 @@ export default createPrototype({
       name: 'columns',
       title: '列数',
       setter: <NumberSetter />,
-      defaultValue: 3,
+      defaultValue: 2,
     },
   ],
 });

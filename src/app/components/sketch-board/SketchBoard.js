@@ -1,8 +1,7 @@
 import { Component } from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
-import Draggable from 'react-draggable';
-import findKey from 'lodash/findKey';
+import { withContext } from 'recompose';
 
 import ControlLayer from './ControlLayer';
 import * as VComponents from '../../../visual-components';
@@ -17,10 +16,8 @@ export default class SketchBoard extends Component {
     activeComponent: null,
     focusComponent: null,
     setActiveComponent() {},
-    startDragging() {},
-    stopDragging() {},
+    stopDrag() {},
     removeComponent() {},
-    dragging: false,
     screenSize: undefined,
     setMouseIn() {},
     setMouseOut() {},
@@ -31,32 +28,31 @@ export default class SketchBoard extends Component {
     activeComponent: PropTypes.string,
     focusComponent: PropTypes.string,
     setActiveComponent: PropTypes.func,
-    startDragging: PropTypes.func,
-    stopDragging: PropTypes.func,
+    stopDrag: PropTypes.func,
     removeComponent: PropTypes.func,
-    dragging: PropTypes.bool,
     screenSize: PropTypes.arrayOf(PropTypes.number),
     setMouseIn: PropTypes.func,
     setMouseOut: PropTypes.func,
   }
-  componentRefs = {}
-  dockerRefs = {}
   handleMouseOver = (e) => {
     const { setFocus } = this.props;
     let element = e.target;
     let matchComponentId;
     let isDockerMatch = false;
     while (element !== this.el) {
-      matchComponentId = findKey(this.componentRefs, node => (node === element));
+      if (element.dataset.cid) {
+        matchComponentId = element.dataset.cid;
+      }
       if (matchComponentId) break;
-      matchComponentId = findKey(this.dockerRefs, node => (node === element));
+      if (element.dataset.dockerId) {
+        matchComponentId = element.dataset.dockerId;
+      }
       if (matchComponentId) {
         isDockerMatch = true;
         break;
       }
       element = element.parentElement;
     }
-    // console.log('matchComponentId', matchComponentId, isDockerMatch);
     if (matchComponentId) {
       setFocus(matchComponentId, isDockerMatch ? 'INSERT' : 'APPEND');
     } else {
@@ -74,6 +70,9 @@ export default class SketchBoard extends Component {
       case 'delete':
         this.props.removeComponent(id);
         break;
+      case 'drag':
+        this.props.setActiveComponent(id);
+        break;
       default:
         break;
     }
@@ -82,10 +81,8 @@ export default class SketchBoard extends Component {
     const {
       activeComponent,
       focusComponent,
-      dragging,
       setActiveComponent,
-      startDragging,
-      stopDragging,
+      stopDrag,
     } = this.props;
     return components.map((c) => {
       const View = VComponents[c.component].PrototypeView;
@@ -93,56 +90,52 @@ export default class SketchBoard extends Component {
         id: c.id,
         // ...c.props,
         store: new Store(c),
-        dockerRef: el => (this.dockerRefs[c.id] = el),
       };
       const innerContent = this.renderComponents(c.children);
       const active = activeComponent === c.id;
       const focus = focusComponent === c.id;
-      const isCurrentDragComponent = dragging && active;
-      const dragProps = {
-        key: c.id,
-        position: { x: 0, y: 0 },
-        onStart() {
-          if (!active) {
-            setActiveComponent(c.id);
-          }
-          startDragging();
-        },
-        onStop() {
-          stopDragging();
-        },
-        handle: `.control-handler-${c.id}`,
-        disabled: dragging && !active,
-      };
       const controlProps = {
+        key: c.id,
         id: c.id,
-        componentRef: el => (this.componentRefs[c.id] = el),
         active,
         focus,
-        dragging: isCurrentDragComponent,
         handleClick(e) {
           e.stopPropagation();
           if (!active) {
             setActiveComponent(c.id);
           }
         },
+        handleDragStart() {
+          if (!active) {
+            setActiveComponent(c.id);
+          }
+        },
+        handleDragStop() {
+          stopDrag();
+        },
         handleControlClick: this.handleControlClick.bind(this, c.id),
       };
+      const EnhanceView = withContext(
+        {
+          id: PropTypes.string,
+          focus: PropTypes.bool,
+        },
+        () => ({
+          id: c.id,
+          focus,
+        }),
+      )(View);
       return (
-        <Draggable {...dragProps}>
-          <ControlLayer {...controlProps}>
-            <View {...viewProps}>
-              {innerContent}
-            </View>
-          </ControlLayer>
-        </Draggable>
+        <ControlLayer {...controlProps}>
+          <EnhanceView {...viewProps}>
+            {innerContent}
+          </EnhanceView>
+        </ControlLayer>
       );
     });
   }
   renderSchema() {
     const { schemaData } = this.props;
-    this.componentRefs = {};
-    this.dockerRefs = {};
     return this.renderComponents(schemaData);
   }
   render() {

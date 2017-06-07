@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { batchActions } from 'redux-batched-actions';
 
-import { sketchAction, schemaAction, deviceAction } from '../actions/';
+import { sketchAction, schemaAction } from '../actions/';
 import { selectSchema, selectDeviceResolution } from '../selectors/';
 import SketchBoard from '../components/sketch-board/';
 
@@ -16,10 +16,9 @@ class Workspace extends PureComponent {
     activeComponent: null,
     focusComponent: null,
     focusType: null,
-    startDragging() {},
-    stopDraggingAndUpdateSchema() {},
+    startDrag() {},
+    stopDragAndUpdateSchema() {},
     removeComponent() {},
-    dragging: false,
     screenSize: undefined,
     setMouseIn() {},
     setMouseOut() {},
@@ -32,22 +31,21 @@ class Workspace extends PureComponent {
     activeComponent: PropTypes.string,
     focusComponent: PropTypes.string,
     focusType: PropTypes.oneOf(['APPEND', 'INSERT']),
-    startDragging: PropTypes.func,
-    stopDraggingAndUpdateSchema: PropTypes.func,
+    startDrag: PropTypes.func,
+    stopDragAndUpdateSchema: PropTypes.func,
     removeComponent: PropTypes.func,
-    dragging: PropTypes.bool,
     screenSize: PropTypes.arrayOf(PropTypes.number),
     setMouseIn: PropTypes.func,
     setMouseOut: PropTypes.func,
   }
-  handleStopDragging = () => {
+  handleStopDrag = () => {
     const {
       activeComponent,
       focusComponent,
       focusType,
-      stopDraggingAndUpdateSchema,
+      stopDragAndUpdateSchema,
     } = this.props;
-    stopDraggingAndUpdateSchema(activeComponent, focusComponent, focusType);
+    stopDragAndUpdateSchema(activeComponent, focusComponent, focusType);
   }
   render() {
     const {
@@ -58,8 +56,7 @@ class Workspace extends PureComponent {
       activeComponent,
       focusComponent,
       removeComponent,
-      startDragging,
-      dragging,
+      startDrag,
       screenSize,
       setMouseIn,
       setMouseOut,
@@ -74,9 +71,8 @@ class Workspace extends PureComponent {
       activeComponent,
       focusComponent,
       removeComponent,
-      startDragging,
-      stopDragging: this.handleStopDragging,
-      dragging,
+      startDrag,
+      stopDrag: this.handleStopDrag,
       screenSize,
       setMouseIn,
       setMouseOut,
@@ -92,7 +88,6 @@ const mapStateToProps = state => ({
   activeComponent: state.sketch.activeComponent,
   focusComponent: state.sketch.focusComponent,
   focusType: state.sketch.focusType,
-  dragging: state.sketch.dragging,
   screenSize: selectDeviceResolution(state),
 });
 
@@ -106,18 +101,15 @@ const mapDispatchToProps = dispatch => ({
   setActiveComponent: (id) => {
     dispatch(sketchAction.setActiveComponent(id));
   },
-  startDragging: () => {
-    dispatch(sketchAction.startDragging());
+  startDrag: (id) => {
+    dispatch(sketchAction.startDrag(id));
   },
-  stopDraggingAndUpdateSchema: (activeComponent, focusComponent, focusType) => {
-    dispatch(batchActions([
-      sketchAction.stopDragging(),
-      schemaAction.updateComponent({
-        activeComponent,
-        focusComponent,
-        focusType,
-      }),
-    ]));
+  stopDragAndUpdateSchema: (activeComponent, focusComponent, focusType) => {
+    dispatch(schemaAction.updateComponent({
+      activeComponent,
+      focusComponent,
+      focusType,
+    }));
   },
   removeComponent: (id) => {
     dispatch(batchActions([

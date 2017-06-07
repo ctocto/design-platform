@@ -39,6 +39,13 @@ const babelOptions = {
   ],
 };
 
+function isAntdCSS(id) {
+  return id.endsWith('.css') && id.includes('antd');
+}
+function isOwnCSS(id) {
+  return id.endsWith('.css') && !id.includes('antd');
+}
+
 module.exports = {
   context,
   entry: {
@@ -55,15 +62,15 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /antd\.css$/,
+        test: isAntdCSS,
         use: [
           'style-loader',
           'css-loader',
         ],
       },
       {
-        test: /\.css$/,
-        exclude: /antd\.css$/,
+        test: isOwnCSS,
+        // exclude: /antd\.css$/,
         use: [
           { loader: 'style-loader' },
           {

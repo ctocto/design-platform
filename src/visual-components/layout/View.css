@@ -1,19 +1,2 @@
 .Layout__Wrapper {
-  display: flex;
-}
-.Layout__columns {
-  flex: 1;
-  &:first-child {
-    & .Layout__placeholder {
-      margin-left: 10px;
-      width: calc(100% - 15px);
-    }    
-  }
-}
-.Layout__columns {
-  &:last-child {
-    & .Layout__placeholder {
-      width: calc(100% - 15px);
-    }    
-  }
 }

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import Select from 'antd/lib/select';
 
 import { SCREEN_RESOULTION_DEFINE } from '../../constants';
-import styles from './DeviceChanger.css';
+// import styles from './DeviceChanger.css';
 
 const { Option } = Select;
 

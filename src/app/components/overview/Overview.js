@@ -1,8 +1,9 @@
 import { Component } from 'react';
 import PropTypes from 'prop-types';
 import Tree from 'antd/lib/tree';
+import Tooltip from 'antd/lib/tooltip';
 
-import styles from './Overview';
+// import styles from './Overview';
 
 const { TreeNode } = Tree;
 
@@ -23,7 +24,9 @@ export default class Overview extends Component {
   }
   static renderNode = node => (
     <TreeNode
-      title={node.component}
+      title={
+        <Tooltip title={node.id}>{node.component}</Tooltip>
+      }
       key={node.id}
     >
       {

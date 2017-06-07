@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import BaseView from '../base/';
 
-import styles from './View.css';
+// import styles from './View.css';
 
 export default class View extends BaseView {
   static defaultProps = {

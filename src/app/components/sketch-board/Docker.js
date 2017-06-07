@@ -5,34 +5,21 @@ import styles from './Docker.css';
 
 export default class Docker extends Component {
   static defaultProps = {
-    dockerRef() {},
   }
   static propTypes = {
-    dockerRef: PropTypes.func,
   }
-  state = {
-    active: false,
-  }
-  handleEnter = () => {
-    this.setState({
-      active: true,
-    });
-  }
-  handleLeave = () => {
-    this.setState({
-      active: false,
-    });
+  static contextTypes = {
+    id: PropTypes.string,
+    focus: PropTypes.bool,
   }
   render() {
-    const { children, dockerRef } = this.props;
-    const { active } = this.state;
+    const { children } = this.props;
+    const { focus, id } = this.context;
     const dockerProps = {
-      ref: dockerRef,
+      ['data-docker-id']: id,
       className: classnames(styles.Docker__wrapper, {
-        [styles['Docker__wrapper--active']]: active,
+        [styles['Docker__wrapper--active']]: focus,
       }),
-      onMouseEnter: this.handleEnter,
-      onMouseLeave: this.handleLeave,
     };
     return <div {...dockerProps}>{children}</div>;
   }

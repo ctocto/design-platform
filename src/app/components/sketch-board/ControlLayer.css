@@ -14,7 +14,7 @@
   }
 }
 .Layer__wrapper--dragging {
-  pointer-events: none;
+  /*pointer-events: none;*/
 }
 
 .Layer__controlBtn {

@@ -1,5 +1,5 @@
 import pick from 'lodash/pick';
-import hocSetter from '../helpers/hoc-setter';
+import setterProvider from '../helpers/setter-hoc';
 
 export const createPrototype = config => ({
   meta: pick(config, ['icon', 'name']),
@@ -27,7 +27,7 @@ export const createPrototype = config => ({
           },
         });
         Object.defineProperty(o, 'setter', {
-          value: hocSetter.call(o, item.setter, item),
+          value: setterProvider.call(o, item.setter, item),
         });
         if (item.defaultValue) {
           o.value = item.defaultValue;

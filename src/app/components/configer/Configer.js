@@ -1,12 +1,14 @@
-import { Component } from 'react';
+import { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
 import isEqual from 'lodash/isEqual';
+import { shallowEqual } from 'recompose';
 
-import styles from './Configer';
+// import styles from './Configer';
 import * as VComponents from '../../../visual-components/';
 
-export default class Configer extends Component {
+
+export default class Configer extends PureComponent {
   static defaultProps = {
     component: undefined,
     setProp() {},
@@ -23,18 +25,32 @@ export default class Configer extends Component {
     setProp: PropTypes.func,
     componentIds: PropTypes.arrayOf(PropTypes.string),
   }
-  static renderConfigBlock = (config, props) => {
-    return (
-      <div key={`c-${config.name}`}>
-        <h3>{config.title}</h3>
-        <config.setter fields={props} />
-      </div>
-    );
+  static renderConfigBlock = (config, props) => (
+    <div key={`c-${config.name}`}>
+      <h3>{config.title}</h3>
+      <config.setter fields={props} />
+    </div>
+  )
+  shouldComponentUpdate(nextProps) {
+    if (
+      get(nextProps, ['component', 'id']) === get(this.props, ['component', 'id']) &&
+      shallowEqual(
+        get(nextProps, ['componentIds']),
+        get(this.props, ['componentIds']),
+      ) &&
+      shallowEqual(
+        get(nextProps, ['component', 'props']),
+        get(this.props, ['component', 'props']),
+      )
+    ) {
+      return false;
+    }
+    return true;
   }
   componentDidUpdate(prevProps) {
     const { componentIds } = this.props;
     if (!isEqual(componentIds, prevProps.componentIds)) {
-      Object.keys(this.prototypeStore).forEach(id => {
+      Object.keys(this.prototypeStore).forEach((id) => {
         if (!componentIds.includes(id)) {
           delete this.prototypeStore[id];
         }

@@ -8,6 +8,7 @@
 - [redux-actions](https://github.com/acdlite/redux-actions)
 - [redux-batched-actions](https://github.com/tshelburne/redux-batched-actions)
 - [seamless-immutable](https://github.com/rtfeldman/seamless-immutable)
+- [recompose](https://github.com/acdlite/recompose)
 
 ## actions
 

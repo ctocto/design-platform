@@ -1,6 +1,7 @@
 import Draggable from 'react-draggable';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
+import { onlyUpdateForKeys } from 'recompose';
 
 import styles from './Picker.css';
 
@@ -49,4 +50,4 @@ Picker.propTypes = {
   inSketch: PropTypes.bool,
 };
 
-export default Picker;
+export default onlyUpdateForKeys(['inSketch', 'name'])(Picker);
