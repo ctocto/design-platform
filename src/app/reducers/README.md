@@ -5,10 +5,6 @@
 {
   sketch: {
     activeComponent,
-    dragging,
-    focusComponent,
-    focusType,
-    mouseIn,
   },
   device: {
     name,

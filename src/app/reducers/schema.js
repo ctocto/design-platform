@@ -3,7 +3,6 @@ import find from 'lodash/find';
 import { normalize } from 'normalizr';
 import Immutable from 'seamless-immutable';
 import {
-  SCHEMA_ADD_COMPONENT,
   SCHEMA_REMOVE_COMPONENT,
   SCHEMA_UPDATE_COMPONENT,
   SCHEMA_UPDATE_PROPS,
@@ -12,15 +11,13 @@ import { appSchema } from '../schema/';
 
 const initialState = Immutable(normalize([], appSchema));
 
-const insert = (array, index, value) => {
-  if (index === -1) {
-    return array.concat([value]);
-  }
-  return array.slice(0, index).concat([value]).concat(array.slice(index));
-};
-
 const insertAfter = (array, target, value) => {
-  const index = array.indexOf(target) + 1;
+  let index = array.indexOf(target);
+  if (index === -1) {
+    index = array.length + 1;
+  } else {
+    index += 1;
+  }
   return array.slice(0, index).concat([value]).concat(array.slice(index));
 };
 
@@ -29,14 +26,14 @@ const removeById = (array, id) => {
   return array.slice(0, index).concat(array.slice(index + 1));
 };
 
-const findParentComponent = (components, id) => find(
+const findParentComponent = (components = {}, id) => find(
   Object.values(components),
   o => o.children.includes(id),
 );
 
 const updateSchemaByInsert = (schemaData, tid, id) => {
   let ret;
-  if (schemaData.result.includes(tid)) {
+  if (!tid || schemaData.result.includes(tid)) {
     ret = schemaData.update('result', ids => insertAfter(ids, tid, id));
   } else {
     const parentComponent = findParentComponent(schemaData.entities.components, tid);
@@ -48,43 +45,16 @@ const updateSchemaByInsert = (schemaData, tid, id) => {
   return ret;
 };
 
-const findComponent = (id, result, components) => {
-  const ret = {
-    id,
-  };
-  if (result.includes(id)) {
-    assign(ret, {
-      pid: null,
-      index: result.indexOf(id),
-    });
-  } else {
-    Object.keys(components).some((cid) => {
-      const c = components[cid];
-      if (cid !== id) {
-        if (c.children.includes(id)) {
-          assign(ret, {
-            pid: c.id,
-            index: c.children.indexOf(id),
-          });
-          return true;
-        }
-      }
-      return false;
-    });
-  }
-  return ret;
-};
-
 function schema(state = initialState, action) {
   const { payload } = action;
   let newState;
   switch (action.type) {
     case SCHEMA_UPDATE_COMPONENT:
       const {
-        component,
+        component, // needly when type is ADD
+        props, // needly when type is ADD
         type, // ADD or UPDATE
         id,
-        props,
         tid, // target id
         AS_CHILD,
       } = payload;
@@ -120,23 +90,21 @@ function schema(state = initialState, action) {
         if (!state.entities.components[id]) {
           return state;
         }
-        if (AS_CHILD) {
-          let parentComponent = findParentComponent(state.entities.components, id);
+        if (id === tid) {
+          return state;
+        }
+        if (state.result.includes(id)) {
+          newState = state.update('result', ids => removeById(ids, id));
+        } else {
+          const parentComponent = findParentComponent(state.entities.components, id);
           newState = state.updateIn(['entities', 'components', parentComponent.id, 'children'], ids => removeById(ids, id));
+        }
+        if (AS_CHILD) {
           newState = newState.updateIn(
             ['entities', 'components', tid, 'children'],
             ids => ids.concat([id]),
           );
         } else {
-          if (state.result.includes(id)) {
-            newState = state.update('result', ids => removeById(ids, id));
-          } else {
-            let parentComponent = findParentComponent(state.entities.components, tid);
-            newState = state.updateIn(
-              ['entities', 'components', parentComponent.id, 'children'],
-              ids => insertAfter(ids, tid, id),
-            );
-          }
           newState = updateSchemaByInsert(newState, tid, id);
         }
       }

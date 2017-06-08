@@ -13,67 +13,29 @@ import styles from './SketchBoard.css';
 
 class SketchBoard extends Component {
   static defaultProps = {
-    setFocus() {},
     schemaData: [],
     activeComponent: null,
-    focusComponent: null,
     setActiveComponent() {},
-    // stopDrag() {},
+    updateComponent() {},
     removeComponent() {},
     screenSize: undefined,
-    setMouseIn() {},
-    setMouseOut() {},
+    connectClassDropTarget() {},
+    connectInstanceDropTarget() {},
   }
   static propTypes = {
-    setFocus: PropTypes.func,
     schemaData: PropTypes.array,
     activeComponent: PropTypes.string,
-    focusComponent: PropTypes.string,
     setActiveComponent: PropTypes.func,
-    // stopDrag: PropTypes.func,
+    updateComponent: PropTypes.func,
     removeComponent: PropTypes.func,
     screenSize: PropTypes.arrayOf(PropTypes.number),
-    setMouseIn: PropTypes.func,
-    setMouseOut: PropTypes.func,
-  }
-  handleMouseOver = (e) => {
-    const { setFocus } = this.props;
-    let element = e.target;
-    let matchComponentId;
-    let isDockerMatch = false;
-    while (element !== this.el) {
-      if (element.dataset.cid) {
-        matchComponentId = element.dataset.cid;
-      }
-      if (matchComponentId) break;
-      if (element.dataset.dockerId) {
-        matchComponentId = element.dataset.dockerId;
-      }
-      if (matchComponentId) {
-        isDockerMatch = true;
-        break;
-      }
-      element = element.parentElement;
-    }
-    if (matchComponentId) {
-      setFocus(matchComponentId, isDockerMatch ? 'INSERT' : 'APPEND');
-    } else {
-      setFocus(matchComponentId, 'APPEND');
-    }
-  }
-  handleMouseEnter = () => {
-    this.props.setMouseIn();
-  }
-  handleMouseLeave = () => {
-    this.props.setMouseOut();
+    connectClassDropTarget: PropTypes.func,
+    connectInstanceDropTarget: PropTypes.func,
   }
   handleControlClick(id, type) {
     switch (type) {
       case 'delete':
         this.props.removeComponent(id);
-        break;
-      case 'drag':
-        this.props.setActiveComponent(id);
         break;
       default:
         break;
@@ -82,9 +44,8 @@ class SketchBoard extends Component {
   renderComponents(components) {
     const {
       activeComponent,
-      focusComponent,
       setActiveComponent,
-      // stopDrag,
+      updateComponent,
     } = this.props;
     return components.map((c) => {
       const View = VComponents[c.component].PrototypeView;
@@ -95,36 +56,26 @@ class SketchBoard extends Component {
       };
       const innerContent = this.renderComponents(c.children);
       const active = activeComponent === c.id;
-      const focus = focusComponent === c.id;
       const controlProps = {
         key: c.id,
         id: c.id,
         active,
-        focus,
         handleClick(e) {
           e.stopPropagation();
           if (!active) {
             setActiveComponent(c.id);
           }
         },
-        handleDragStart() {
-          if (!active) {
-            setActiveComponent(c.id);
-          }
-        },
-        // handleDragStop() {
-        //   stopDrag();
-        // },
+        updateComponent,
+        setActiveComponent,
         handleControlClick: this.handleControlClick.bind(this, c.id),
       };
       const EnhanceView = withContext(
         {
           id: PropTypes.string,
-          focus: PropTypes.bool,
         },
         () => ({
           id: c.id,
-          focus,
         }),
       )(View);
       return (
@@ -141,7 +92,7 @@ class SketchBoard extends Component {
     return this.renderComponents(schemaData);
   }
   render() {
-    const { screenSize, connectDropTarget } = this.props;
+    const { screenSize, connectClassDropTarget, connectInstanceDropTarget } = this.props;
     const props = {
       className: classnames(styles.SketchBoard),
       style: {
@@ -149,20 +100,16 @@ class SketchBoard extends Component {
         height: screenSize[1],
       },
       ref: node => (this.el = node),
-      onMouseOver: this.handleMouseOver,
-      onMouseEnter: this.handleMouseEnter,
-      onMouseLeave: this.handleMouseLeave,
     };
-    console.log(this.props);
-    return connectDropTarget(
+    return connectClassDropTarget(connectInstanceDropTarget(
       <div {...props}>
         {this.renderSchema()}
       </div>
-    );
+    ));
   }
 }
 
-const sketchTarget = {
+const classTarget = {
   drop(props, monitor) {
     if (!monitor.didDrop()) {
       return {
@@ -172,8 +119,28 @@ const sketchTarget = {
   },
 };
 
-const collect = (connect, monitor) => ({
-  connectDropTarget: connect.dropTarget(),
-});
+const instanceTarget = {
+  drop(props, monitor) {
+    if (!monitor.didDrop()) {
+      return {
+        target: 'root',
+        id: null,
+        status: 'OVER',
+      };
+    }
+  },
+};
 
-export default DropTarget(DndTypes.CLASS, sketchTarget, collect)(SketchBoard);
+export default DropTarget(
+  DndTypes.CLASS,
+  classTarget,
+  connect => ({
+    connectClassDropTarget: connect.dropTarget(),
+  }),
+)(DropTarget(
+  DndTypes.INSTANCE,
+  instanceTarget,
+  connect => ({
+    connectInstanceDropTarget: connect.dropTarget(),
+  }),
+)(SketchBoard));

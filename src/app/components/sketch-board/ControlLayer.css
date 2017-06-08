@@ -1,13 +1,13 @@
 .Layer__wrapper {
   position: relative;
 }
-.Layer__wrapper--focus {
+.Layer__wrapper--focus, .Layer__wrapper:hover {
   border: 1px dashed #f00;
   & > .Layer__controlBtn {
     display: block;
   }
 }
-.Layer__wrapper--active {
+.Layer__wrapper--active, .Layer__wrapper--active:hover {
   border: 1px solid #f00;
   & > .Layer__controlBtn {
     display: block;

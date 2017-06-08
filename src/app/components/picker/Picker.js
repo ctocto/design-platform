@@ -1,5 +1,4 @@
 import { PureComponent } from 'react';
-// import Draggable from 'react-draggable';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import assign from 'lodash/assign';
@@ -20,9 +19,8 @@ const componentSource = {
       return;
     }
     const dropResult = monitor.getDropResult();
-    console.warn(dropResult);
     props.addComponent(assign({
-      componentName: props.name,
+      component: props.name,
     }, dropResult));
   },
 };
@@ -33,6 +31,7 @@ class Picker extends PureComponent {
     name: undefined,
     meta: undefined,
     addComponent() {},
+    connectDragSource() {},
   }
   static propTypes = {
     name: PropTypes.string,
@@ -41,6 +40,7 @@ class Picker extends PureComponent {
       icon: PropTypes.node,
     }),
     addComponent: PropTypes.func,
+    connectDragSource: PropTypes.func,
   }
   render() {
     const {
@@ -63,6 +63,5 @@ export default DragSource(
   componentSource,
   (connect, monitor) => ({
     connectDragSource: connect.dragSource(),
-    // isDragging: monitor.isDragging(),
   }),
 )(Picker);

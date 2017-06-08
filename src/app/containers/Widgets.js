@@ -40,39 +40,30 @@ class Widgets extends PureComponent {
       pick(this.props, ['className']),
     );
   }
-  handleAddComponent = ({ componentName, target, id, status }) => {
-    
+  handleAddComponent = ({ component, target, id, status }) => {
     const { addComponentToSchema } = this.props;
     const info = {
-      pid: null,
-      // index: -1,
-      componentName,
+      component,
+      type: 'ADD',
+      tid: id,
     };
     if (target === 'root') {
-      // nothing
+      assign(info, {
+        AS_CHILD: false,
+      });
     } else {
       if (status === 'OVER') {
         assign(info, {
-
+          AS_CHILD: false,
         });
       } else if (status === 'INSIDE') {
-
+        assign(info, {
+          AS_CHILD: true,
+        });
       }
-      // if (focusComponent.id) {
-      //   if (focusType === 'INSERT') {
-      //     assign(info, {
-      //       pid: focusComponent.id,
-      //     });
-      //   } else {
-      //     assign(info, {
-      //       pid: focusComponent.pid,
-      //       index: focusComponent.index + 1,
-      //     });
-      //   }
-      // }
     }
     const configers = get(VComponents, [
-      componentName,
+      component,
       'prototype',
       'configers',
     ], []);
@@ -84,8 +75,8 @@ class Widgets extends PureComponent {
     });
 
     addComponentToSchema(assign(info, {
-      id: uniqueId(componentName),
-      componentProps: initialProps,
+      id: uniqueId(component),
+      props: initialProps,
     }));
   }
   renderPicker = ({ name, meta }) => {
@@ -124,7 +115,7 @@ const mapDispatchToProps = dispatch => ({
   addComponentToSchema(payload) {
     dispatch(
       batchActions([
-        schemaAction.addComponentToSchema(payload),
+        schemaAction.updateComponent(payload),
         sketchAction.setActiveComponent(payload.id),
       ]),
     );

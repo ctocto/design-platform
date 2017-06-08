@@ -23,7 +23,7 @@ export default class View extends BaseView {
     let key;
     const content = fill(Array(count)).map((d, i) => {
       if (children[i]) {
-        inner = <div style={{padding: 20}}>{children[i]}</div>;
+        inner = children[i];
         key = children[i].key;
       } else if (hasDocker) {
         inner = <Placeholder />;

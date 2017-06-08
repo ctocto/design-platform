@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import { PureComponent } from 'react';
-// import Draggable from 'react-draggable';
 import get from 'lodash/get';
 import pick from 'lodash/pick';
 import { shallowEqual } from 'recompose';
@@ -12,52 +11,42 @@ import styles from './ControlLayer.css';
 import Drag from './drag.svg';
 import Delete from './delete.svg';
 
-const compareKeys = [
-  'id',
-  'active',
-  'focus',
-  'className',
-];
-
 class ControlLayer extends PureComponent {
   static defaultProps = {
     id: undefined,
     active: false,
-    focus: false,
     className: '',
     handleClick() {},
-    handleDragStart() {},
-    handleDragStop() {},
+    updateComponent() {},
+    setActiveComponent() {},
     handleControlClick() {},
+    connectClassDropTarget() {},
+    connectInstanceDropTarget() {},
+    connectDragSource() {},
+    connectDragPreview() {},
   }
   static propTypes = {
     id: PropTypes.string.isRequired,
     active: PropTypes.bool,
-    focus: PropTypes.bool,
     className: PropTypes.string,
     handleClick: PropTypes.func,
-    handleDragStart: PropTypes.func,
-    handleDragStop: PropTypes.func,
+    updateComponent: PropTypes.func,
+    setActiveComponent: PropTypes.func,
     handleControlClick: PropTypes.func,
+    connectClassDropTarget: PropTypes.func,
+    connectInstanceDropTarget: PropTypes.func,
+    connectDragSource: PropTypes.func,
+    connectDragPreview: PropTypes.func,
   }
-  shouldComponentUpdate(nextProps) {
-    if (
-      shallowEqual(
-        this.props.children.props.store.getProps(),
-        nextProps.children.props.store.getProps(),
-      ) &&
-      shallowEqual(
-        pick(this.props, compareKeys),
-        pick(nextProps, compareKeys),
-      ) &&
-      shallowEqual(
-        get(this.props, ['style']),
-        get(nextProps, ['style']),
-      )
-    ) {
-      return false;
-    }
-    return true;
+  static getStateByProps = props => ({
+    focus: props.hoverByClass || props.hoverByInstance,
+  })
+  constructor(props) {
+    super(props);
+    this.state = ControlLayer.getStateByProps(props);
+  }
+  componentWillReceiveProps(nextProps) {
+    this.setState(ControlLayer.getStateByProps(nextProps));
   }
   handleClickDeleteBtn = (e) => {
     e.stopPropagation();
@@ -67,53 +56,53 @@ class ControlLayer extends PureComponent {
     const {
       id,
       active,
-      focus,
       className,
       handleClick,
-      handleDragStart,
-      handleDragStop,
       handleControlClick,
       children,
       connectClassDropTarget,
       connectInstanceDropTarget,
       connectDragSource,
-      ...otherProps
+      connectDragPreview,
     } = this.props;
+    const { focus } = this.state;
     const props = {
-      ['data-cid']: id,
       className: classnames(className, styles.Layer__wrapper, {
         [styles['Layer__wrapper--active']]: active,
         [styles['Layer__wrapper--focus']]: focus,
       }),
       onClick: handleClick,
-      ...otherProps,
     };
     console.warn('render controlLayer');
-    return connectDragSource(
-      connectInstanceDropTarget(
+    return connectInstanceDropTarget(
         connectClassDropTarget(
-          <div {...props}>
-            <button
-              className={classnames(
-                styles.Layer__controlBtn,
-                styles.Layer__deleteBtn,
-              )}
-              onClick={this.handleClickDeleteBtn}
-            >
-              <Delete width={16} height={16} />
-            </button>
-            <button
-              className={classnames(
-                `control-handler-${id}`,
-                styles.Layer__controlBtn,
-                styles.Layer__dragControl,
-              )}
-            >
-              <Drag width={16} height={16} />
-            </button>
-            {children}
-          </div>,
-      )));
+          connectDragPreview(
+            <div {...props}>
+              <button
+                className={classnames(
+                  styles.Layer__controlBtn,
+                  styles.Layer__deleteBtn,
+                )}
+                onClick={this.handleClickDeleteBtn}
+              >
+                <Delete width={16} height={16} />
+              </button>
+              {
+                connectDragSource(
+                  <button
+                    className={classnames(
+                      `control-handler-${id}`,
+                      styles.Layer__controlBtn,
+                      styles.Layer__dragControl,
+                    )}
+                  >
+                    <Drag width={16} height={16} />
+                  </button>,
+                )
+              }
+              {children}
+            </div>,
+        )));
   }
 }
 
@@ -129,32 +118,56 @@ const classTarget = {
   },
 };
 const instanceTarget = {
-
+  drop(props, monitor) {
+    if (!monitor.didDrop()) {
+      return {
+        target: 'instance',
+        id: props.id,
+        status: 'OVER',
+      };
+    }
+  },
 };
 const instanceSource = {
   beginDrag(props) {
+    // props.setActiveComponent(props.id);
     return {
       id: props.id,
     };
+  },
+  endDrag(props, monitor) {
+    if (!monitor.didDrop()) {
+      return;
+    }
+    const dropResult = monitor.getDropResult();
+    props.updateComponent({
+      tid: dropResult.id,
+      type: 'UPDATE',
+      id: props.id,
+      AS_CHILD: dropResult.status !== 'OVER',
+    });
   },
 };
 
 export default DropTarget(
   DndTypes.CLASS,
   classTarget,
-  connect => ({
+  (connect, monitor) => ({
     connectClassDropTarget: connect.dropTarget(),
+    hoverByClass: monitor.isOver({ shallow: true }),
   }),
 )(DropTarget(
   DndTypes.INSTANCE,
   instanceTarget,
-  connect => ({
+  (connect, monitor) => ({
     connectInstanceDropTarget: connect.dropTarget(),
+    hoverByInstance: monitor.isOver({ shallow: true }),
   }),
 )(DragSource(
   DndTypes.INSTANCE,
   instanceSource,
   connect => ({
     connectDragSource: connect.dragSource(),
+    connectDragPreview: connect.dragPreview(),
   }),
 )(ControlLayer)));
